@@ -49,6 +49,12 @@ DATABASE_URL="postgresql://{username}:{password}@localhost:5432/capstone"
 4. Run the setup.sh file to set the env variables for Auth0, database uri and flask setting to run the app locally
 ```bash
 source ./setup.sh
+
+# Optional - Run these commands to check that env variables have been set
+echo $DATABASE_URI
+echo $FLASK_APP
+echo $FLASK_DEBUG
+echo $FLASK_ENVIRONMENT
 ```
 
 5. To run the sever locally, run:
@@ -59,12 +65,10 @@ conda activate capstone_env
 
 # activate virtual_env
 
-#TODO - is this needed with the setup.sh file?
-export FLASK_APP=flaskr
-export FLASK_DEBUG=True
-export FLASK_ENVIRONMENT=debug
 
 flask run --reload
+
+# use run_local.sh
 ```
 
 ## Create database
