@@ -323,8 +323,80 @@ https://www.postgresqltutorial.com/postgresql-administration/postgresql-backup-d
 
 
 # TODO LIST
-- [ ] unchecked
-- [x] checked
-
 :white_check_mark: checked
-:green_square_button: unchecked
+:black_square_button: unchecked
+
+:white_check_mark: move models to separate file
+:white_check_mark: add many-to-many relationship between Actor and Movie
+:question: one-to-many relationship - Director and Movies?
+:question: allow linking of more than one actor to a movie and visa versa
+change endpoint (remove last int and add code to get request_body)
+:black_square_button: test if a default date for Movie works
+:question: remove nullable = False or have default 'None' in POST and PATCH endpionts?
+:black_square_button: update README:
+- curl -X POST http://127.0.0.1:5000/movie/3/actor/2
+- GET: curl http://127.0.0.1:5000/actor/1/movies
+- GET: curl http://127.0.0.1:5000/movie/3/actors
+:black_square_button: @app.errorhandler for at least four status codes
+:black_square_button: update endpoints with try: except: blocks
+:black_square_button: test error handling
+:black_square_button: implement Migrations and reset database
+
+### Authorisation and 
+:black_square_button: setup Auth0 with three roles - 
+:black_square_button: get Auth header, decode and verfiy JWT, takes argumnet to describe action
+:black_square_button: add @requires decorator to endpoints
+:black_square_button: raise error if; token expried, claims invalid, token invalid, improper action
+:black_square_button: update setup.sh file
+:black_square_button: test authorisation
+:black_square_button: update docstrings with auth details
+:black_square_button: update readme with auth and role details
+
+### Testing
+:black_square_button: add test folder/files
+:black_square_button: add tests for one success and one failure for each endpoint
+- GET actors
+- GET movies
+- GET actor movies
+- GET movie actors
+- POST actor
+- POST movie
+- POST actor to movie
+- PATCH actor
+- PATCH movie
+- DELETE actor
+- DELETE movie
+:black_square_button: add tests demonstrating role-based access (two for each role)
+https://knowledge.udacity.com/questions/321996
+https://knowledge.udacity.com/questions/724461 - include tokens in setup.sh
+https://knowledge.udacity.com/questions/199305
+:black_square_button: update setup.sh file with tokens
+:black_square_button: update README with testing database setup and how to run tests
+
+### Deployment
+:black_square_button: host API on render or AWS
+:black_square_button: add URL and details to README
+:black_square_button: update README with instructions to setup authentication so endpoints can be tested
+
+### Code Quality and Documentation
+:black_square_button: run pycodestyle against all .py files
+:black_square_button: check all comments and docstrings
+:black_square_button: all secrets stored as environment variables
+:black_square_button: README includes
+    :black_square_button: Motivation for the project
+    :black_square_button: Project dependencies
+    :black_square_button: Local development
+    :black_square_button: Hosting instructions
+    :black_square_button: Detailed instructions for scripts to setup authentication
+    :black_square_button: Detailed instructions to install project dependencies
+    :black_square_button: Detailed instructions to run the development server
+    :black_square_button: Documentation of API behaviour
+    :black_square_button: Documentaion of RBAC controls
+
+### Final Setup
+:black_square_button: create db
+:black_square_button: run migrations to add tables
+:black_square_button: run app and use curl commands to add actors, movies and link some of them together
+:black_square_button: pg_dump and save output to .psql file
+:black_square_button: ensure Auth0 is running and jwt tokens will be valid before submission
+:black_square_button: update setup.sh file with tokens
