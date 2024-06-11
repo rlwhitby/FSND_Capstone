@@ -348,6 +348,9 @@ change endpoint (remove last int and add code to get request_body)
 
 :black_square_button: update endpoints with try: except: blocks
 
+:black_square_button: try this to write more dynamic 404 messages:
+https://flask.palletsprojects.com/en/2.1.x/errorhandling/ Returning API Errors as JSON
+
 :black_square_button: test error handling
 
 :black_square_button: implement Migrations and reset database

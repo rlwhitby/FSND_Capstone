@@ -1,5 +1,5 @@
 import os
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, abort
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 #TODO: change model names
@@ -614,8 +614,11 @@ def create_app(test_config=None):
                 Actor.id == actor_id
                 ).one_or_none()
         
-        # if actor is None:
-        #     abort(404)
+        if actor is None:
+            abort(404)
+            #TODO https://flask.palletsprojects.com/en/2.1.x/errorhandling/
+            # Returning API Errors as JSON
+            # abort(404, description="The actor with id " + actor_id + " does not exist.")
 
         movie.actors.append(actor)
         movie.insert()
@@ -648,6 +651,10 @@ def create_app(test_config=None):
         #             "created": movie.id,
         #         }
         #     )
+
+        #TODO: https://flask.palletsprojects.com/en/2.1.x/errorhandling/
+        # Generic Exception Handlers section
+
         # except Exception as e:
         #     if isinstance(e, HTTPException):
         #         abort(e.code)
@@ -659,5 +666,101 @@ def create_app(test_config=None):
     # ----------------------------------------------------------------------------#
 
     #TODO: add error handling for at least four status codes
+    """
+    @TODO:
+    Create error handlers for all expected errors
+    including 404 and 422, 400 and 500.
+    """
+
+    @app.errorhandler(400)
+    def bad_request(error):
+        """The bad_request error handler returns a json
+        message, "bad request", when a method is aborted with a 400
+        error.
+        """
+        return (
+            jsonify({
+                "success": False,
+                "error": 400,
+                "message": "bad request"
+            }),
+            400,
+        )
+
+    #TODO: update to allow message to be passed in abort(404) code
+    @app.errorhandler(404)
+    def not_found(error):
+        """The not_found error handler returns a json
+        message, "resource not found", when a method is aborted with a
+        404 error.
+        """
+        return (
+            jsonify({
+                "success": False,
+                "error": 404,
+                "message": "resource not found"
+            }),
+            404,
+        )
+
+    @app.errorhandler(405)
+    def method_not_allowed(error):
+        """The method_not_allowed error handler returns a json
+        message, "method not allowed", when a method is aborted with
+        a 405 error.
+        """
+        return (
+            jsonify({
+                "success": False,
+                "error": 405,
+                "message": "method not allowed"
+            }),
+            405,
+        )
+
+    @app.errorhandler(422)
+    def unprocessable(error):
+        """The unprocessable error handler returns a json
+        message, "unprocessable", when a method is aborted with a 422
+        error.
+        """
+        return (
+            jsonify({
+                "success": False,
+                "error": 422,
+                "message": "unprocessable"
+            }),
+            422,
+        )
+
+    @app.errorhandler(500)
+    def internal_server_error(error):
+        """The internal_server_error error handler returns a json
+        message, "internal server error", when a method is aborted with
+        a 500 error.
+        """
+        return (
+            jsonify({
+                "success": False,
+                "error": 500,
+                "message": "internal server error"
+            }),
+            500,
+        )
+
+
+    #TODO - from Fyyur - what does this do? is it useful?
+    # if not app.debug:
+    # file_handler = FileHandler('error.log')
+    # file_handler.setFormatter(
+    #     Formatter(
+    #         '%(asctime)s %(levelname)s: %(message)s \
+    #         [in %(pathname)s:%(lineno)d]'
+    #              )
+    # )
+    # app.logger.setLevel(logging.INFO)
+    # file_handler.setLevel(logging.INFO)
+    # app.logger.addHandler(file_handler)
+    # app.logger.info('errors')
 
     return app
