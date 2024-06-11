@@ -47,10 +47,6 @@ def db_drop_and_create_all():
     db.create_all()
 
 # ----------------------------------------------------------------------------#
-# Models
-# ----------------------------------------------------------------------------#
-
-# ----------------------------------------------------------------------------#
 # Association Table - many-to-many relationship
 # ----------------------------------------------------------------------------#
 #TODO
@@ -69,26 +65,8 @@ actors_movies = db.Table('actors_movies',
                                          primary_key=True)
                                      )
 
-# class ActorsMovies(db.Model):
-#     # Ref: https://knowledge.udacity.com/questions/510080#510112
-#     __tablename__ = "actors_movies"
-#     id = db.Column(
-#         db.Integer,
-#         primary_key=True
-#     )
-#     actor_id = db.Column(
-#         db.Integer,
-#         db.ForeignKey('actors.id'),
-#         nullable=False
-#     )
-#     movie_id = db.Column(
-#         db.Integer,
-#         db.ForeignKey('movies.id'),
-#         nullable=False
-#     )
-
 # ----------------------------------------------------------------------------#
-# Actor
+# Actor Model
 # ----------------------------------------------------------------------------#
 class Actor(db.Model):
     __tablename__ = "actors"
@@ -146,11 +124,6 @@ class Actor(db.Model):
         db.session.commit()
     
     def format(self):
-        # Ref: https://www.geeksforgeeks.org/check-if-element-exists-in-list-in-python/
-        if not(any(movie in self.movies for movie in self.movies)):
-            movies = "This actor has not been cast in any movies"
-        else:
-            movies = "This actor has been cast in one or more movies"
         # Ref: https://www.geeksforgeeks.org/python-ways-to-find-length-of-list/?ref=lbp
         if len(self.movies) == 0:
             movies = "This actor has not been cast in any movies"
@@ -171,7 +144,7 @@ class Actor(db.Model):
         return f'Actor: {self.id}, {self.name}, {self.age}, {self.gender}'
 
 # ----------------------------------------------------------------------------#
-# Movie
+# Movie Model
 # ----------------------------------------------------------------------------#
 class Movie(db.Model):
     __tablename__ = "movies"
@@ -179,7 +152,8 @@ class Movie(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     title = db.Column(db.String(), nullable=False)
     #TODO - check default is correct
-    release_date = db.Column(db.DateTime(), default=datetime.now(), nullable=False)
+    # default=datetime.now()
+    release_date = db.Column(db.DateTime(), nullable=False)
     # Ref: https://knowledge.udacity.com/questions/510080#510112
     # The backref is now considered legacy
     # Ref: https://docs.sqlalchemy.org/en/20/orm/backref.html

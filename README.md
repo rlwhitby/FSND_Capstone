@@ -295,7 +295,7 @@ curl -d '{"title": "second movie", "release_date": "2024-10-21"}' -H "Content-Ty
 rubric details
 https://knowledge.udacity.com/questions/304257
 
-# https://docs.sqlalchemy.org/en/20/orm/basic_relationships.html#relationship-patterns
+https://docs.sqlalchemy.org/en/20/orm/basic_relationships.html#relationship-patterns
 
 implement message in abort statement + integrity errors if any values must be unique?
 abort(404, message = "No actor with that id exists")
@@ -320,4 +320,11 @@ https://www.nucamp.co/blog/coding-bootcamp-back-end-with-python-and-sql-deployin
 
 pg_dump
 https://www.postgresqltutorial.com/postgresql-administration/postgresql-backup-database/
+
+
+# TODO LIST
+- [ ] unchecked
+- [x] checked
+
+:white_check_mark:
 
