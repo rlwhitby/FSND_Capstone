@@ -326,5 +326,5 @@ https://www.postgresqltutorial.com/postgresql-administration/postgresql-backup-d
 - [ ] unchecked
 - [x] checked
 
-:white_check_mark:
-
+:white_check_mark: checked
+:black_square_button: unchecked
