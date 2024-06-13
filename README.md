@@ -163,6 +163,14 @@ python test_app.py
 }
 ```
 
+If there are no actors in the database, the following json message will show:
+```
+{
+    "error": "404 Not Found: There are no actors in the database",
+    "success": false
+}
+```
+
 
 ### POST /actors/add 
  - General:
@@ -244,12 +252,35 @@ curl -d '{"name": "John Doe", "age": 37, "gender": "Male"}' -H "Content-Type: ap
     - Request Body: {"title": "test movie", "release_date": "test answer"}
     - Returns: The id of the created movie, and the success value.
 
-- Sample: `curl -d '{"title": "test movie", "release_date": "2010-07-10"}' -H "Content-Type: application/json" -X POST http://127.0.0.1:5000/movies/add`
-
-curl -d '{"title": "second movie", "release_date": "2024-10-21"}' -H "Content-Type: application/json" -X POST http://127.0.0.1:5000/movies/add
+- Sample: `curl -d '{"title": "test movie", "release_date": "2010-07-10", "genre": "Action"}' -H "Content-Type: application/json" -X POST http://127.0.0.1:5000/movies/add`
 ```{
   "created": 3, 
   "success": true
+}
+```
+
+If a correct genre is not entered
+`curl -d '{"title": "second movie", "release_date": "2024-10-21", "genre": "x"}' -H "Content-Type: application/json" -X POST http://127.0.0.1:5000/movies/add`
+```{
+  "entered_genre": "x", 
+  "error": "A genre from the following list must be entered:", 
+  "genre list": [
+    "Action", 
+    "Adventure", 
+    "Animation", 
+    "Biography", 
+    "Comedy", 
+    "Crime", 
+    "Documentary", 
+    "Drama", 
+    "Family", 
+    "Fantasy", 
+    "History", 
+    "Horror", 
+    "Musical", 
+    "Romance", 
+    "Scifi"
+  ]
 }
 ```
 
@@ -323,12 +354,10 @@ https://www.postgresqltutorial.com/postgresql-administration/postgresql-backup-d
 
 
 # TODO LIST
-:white_check_mark: checked
-:black_square_button: unchecked
 
-:white_check_mark: move models to separate file
+:white_check_mark: ~~move models to separate file~~
 
-:white_check_mark: add many-to-many relationship between Actor and Movie
+:white_check_mark: ~~add many-to-many relationship between Actor and Movie~~
 
 :question: one-to-many relationship - Director and Movies?
 
@@ -341,14 +370,36 @@ change endpoint (remove last int and add code to get request_body)
 
 :black_square_button: update README:
 - curl -X POST http://127.0.0.1:5000/movie/3/actor/2
+
+ curl -X POST http://127.0.0.1:5000/movie/3/actor/2
+```{
+  "error": "404 Not Found: No movie with id 3 exists", 
+  "success": false
+}
+```
+curl -X POST http://127.0.0.1:5000/movie/1/actor/2
+```{
+  "error": "404 Not Found: No actor with id 2 exists", 
+  "success": false
+}
+```
+
+curl -X POST http://127.0.0.1:5000/movie/1/actor/1
+```{
+  "Actor linked": 1, 
+  "Movie linked": 1, 
+  "success": true
+}
+```
+
 - GET: curl http://127.0.0.1:5000/actor/1/movies
 - GET: curl http://127.0.0.1:5000/movie/3/actors
 
-:black_square_button: @app.errorhandler for at least four status codes
+:white_check_mark: ~~@app.errorhandler for at least four status codes~~
 
 :black_square_button: update endpoints with try: except: blocks
 
-:black_square_button: try this to write more dynamic 404 messages:
+:white_check_mark: ~~try this to write more dynamic 404 messages:~~
 https://flask.palletsprojects.com/en/2.1.x/errorhandling/ Returning API Errors as JSON
 
 :black_square_button: test error handling

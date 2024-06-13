@@ -3,7 +3,8 @@ import os
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from datetime import datetime
-# import json
+import json
+from enums import GenreEnum
 
 # from sqlalchemy import Column, String, Integer, Boolean, create_engine
 # from sqlalchemy.sql.schema import PrimaryKeyConstraint
@@ -74,6 +75,7 @@ class Actor(db.Model):
     name = db.Column(db.String(), nullable=False)
     age = db.Column(db.Integer(), nullable=False)
     gender = db.Column(db.String(), nullable=False)
+    # gender = db.Column(db.Enum(GenderEnum), nullable=False)
     movies = db.relationship(
             'Movie',
             secondary="actors_movies",
@@ -139,6 +141,7 @@ class Actor(db.Model):
             "movies": movies
 
         }
+    
     #TODO: is this needed?
     def __repr__(self):
         return f'Actor: {self.id}, {self.name}, {self.age}, {self.gender}'
@@ -154,6 +157,7 @@ class Movie(db.Model):
     #TODO - check default is correct
     # default=datetime.now()
     release_date = db.Column(db.DateTime(), nullable=False)
+    genre = db.Column(db.Enum(GenreEnum), nullable=False)
     # Ref: https://knowledge.udacity.com/questions/510080#510112
     # The backref is now considered legacy
     # Ref: https://docs.sqlalchemy.org/en/20/orm/backref.html
@@ -218,6 +222,7 @@ class Movie(db.Model):
             "id": self.id,
             "title": self.title,
             "release date": self.release_date,
+            "genre": self.genre,
             "actors": actors
         }
     #TODO: is this needed?

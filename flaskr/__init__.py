@@ -5,6 +5,8 @@ from flask_cors import CORS
 #TODO: change model names
 # from models import setup_db, Plant
 from models import setup_db, Actor, Movie
+import json
+from enums import GenreEnum
 
 # https://flask.palletsprojects.com/en/2.3.x/tutorial/factory/
 def create_app(test_config=None):
@@ -26,7 +28,6 @@ def create_app(test_config=None):
     # # # TODO: connect to a local postgresql database
     # # migrate = Migrate(app, db)
 
-    # db.create_all()
     """
     @TODO: Set up CORS. Allow '*' for origins. Delete the sample route
     after completing the TODOs
@@ -65,8 +66,9 @@ def create_app(test_config=None):
         """
         allActors = Actor.query.all()
 
-        #     if len(categories) == 0:
-        #         abort(404)
+        if len(allActors) == 0:
+            abort(404, description="There are no actors in the database")
+
         actors = list(map(lambda actor: actor.format(), allActors))
 
         return jsonify(
@@ -126,13 +128,13 @@ def create_app(test_config=None):
         actor = Actor.query.filter(
             Actor.id == actor_id
             ).one_or_none()
-        #if actor is None:
-        # abort(404, message = "No actor with that id exists")
+        if actor is None:
+            abort(404, description="No actor with id "+ str(actor_id) +" exists")
         
         movies = [movie.format() for movie in actor.movies]
         
-        #if len(movies) == 0:
-        #    return jsonify({"message": "This actor has not been cast in any movies yet"})
+        if len(movies) == 0:
+            return jsonify({"message": "The actor "+ actor.name + " has not been cast in any movies yet"})
 
         return jsonify(
             {
@@ -223,7 +225,11 @@ def create_app(test_config=None):
         actor = Actor.query.filter(
             Actor.id == actor_id
             ).one_or_none()
-        #if actor is None
+
+        if actor is None:
+            abort(404, description="No actor with id "+ str(actor_id) +" exists")
+        
+        #TODO - what if one of the column names is missing?
         if "name" in body:
             actor.name = body.get("name", None)
         if "age" in body:
@@ -284,6 +290,8 @@ def create_app(test_config=None):
         actor = Actor.query.filter(
                 Actor.id == actor_id
                 ).one_or_none()
+        if actor is None:
+            abort(404, description="No actor with id "+ str(actor_id) +" exists")
         
         actor.delete()
 
@@ -334,8 +342,8 @@ def create_app(test_config=None):
         """
         allMovies = Movie.query.all()
 
-        #     if len(categories) == 0:
-        #         abort(404)
+        if len(allMovies) == 0:
+            abort(404, description="There are no movies in the database")
 
         movies = list(map(lambda movie: movie.format(), allMovies))
 
@@ -397,19 +405,13 @@ def create_app(test_config=None):
             Movie.id == movie_id
             ).one_or_none()
         
+        if movie is None:
+            abort(404, description="No movie with id "+ str(movie_id) +" exists")
+        
         actors = [actor.format() for actor in movie.actors]
         
-        # actors = (
-        #     Actor.query.filter(movie in Actor.movies)
-        #     .order_by(Actor.id)
-        #     .all()
-        #     )
-        
-        #if movie is None:
-        # abort(404)
-
-        #if len(actors) == 0:
-        #    return jsonify({"message": "This movie does not have any cast members yet"})
+        if len(actors) == 0:
+            return jsonify({"message": "The movie "+ movie.title + " does not have any cast members yet"})
 
         return jsonify(
             {
@@ -445,10 +447,25 @@ def create_app(test_config=None):
         body = request.get_json()
         new_title = body.get("title", None)
         new_release_date = body.get("release_date", None)
+        new_genre = body.get("genre")
 
+        genre_list = [genre.value for genre in GenreEnum]
+
+        if new_genre in genre_list:
+            new_genre = body.get("genre")
+        else: 
+            return jsonify(
+                {
+                        "entered_genre": body.get("genre"),
+                        "error": "A genre from the following list must be entered:",
+                        "genre list": genre_list
+                }
+            )
+            
         movie = Movie(
             title=new_title,
             release_date=new_release_date,
+            genre=new_genre
         )
 
         movie.insert()
@@ -500,11 +517,29 @@ def create_app(test_config=None):
         movie = Movie.query.filter(
             Movie.id == movie_id
             ).one_or_none()
-        #if actor is None
+
+        if movie is None:
+            abort(404, description="No movie with id "+ str(movie_id) +" exists")
+
+        #TODO what if column names aren't listed in the body? doesn't seem to be an issue
         if "title" in body:
             movie.title = body.get("title")
         if "release_date" in body:
             movie.release_date = body.get("release_date")
+
+        genre_list = [genre.value for genre in GenreEnum]
+        if "genre" in body:
+            if body.get("genre") in genre_list:
+                movie.genre = body.get("genre")
+            else:
+                return jsonify(
+                    {
+                            "entered_genre": body.get("genre"),
+                            "error": "A genre from the following list must be entered:",
+                            "genre list": genre_list
+                    }
+                )
+            
         movie.update()
 
         return jsonify(
@@ -515,25 +550,7 @@ def create_app(test_config=None):
         )
 
         # try:
-            # actor = Actor.query.filter(
-            #     Actor.id == actor_id
-            #     ).one_or_none()
-            # if actor is None:
-            #     abort(404)
-            # if "name" in body:
-            #     actor.name = body.get("name")
-            # if "age" in body:
-            #     actor.age = body.get("age")
-            # if "gender" in body:
-            #     actor.gender = body.get("gender")
-            # actor.update()
-
-            # return jsonify(
-        #         {
-        #             "success": True,
-        #             "actor": actor.format(),
-        #         }
-        #     )
+       
         # except Exception as e:
         #     if isinstance(e, HTTPException):
         #         abort(e.code)
@@ -560,6 +577,9 @@ def create_app(test_config=None):
                 Movie.id == movie_id
                 ).one_or_none()
         
+        if movie is None:
+            abort(404, description="No movie with id "+ str(movie_id) +" exists")
+        
         movie.delete()
 
         return jsonify(
@@ -569,19 +589,7 @@ def create_app(test_config=None):
             }
         )
         # try:
-        #     movie = Movie.query.filter(
-        #         Movie.id == movie_id
-        #         ).one_or_none()
-        #     if actor is None:
-        #         abort(404)
-        #     movie.delete()
-
-        #     return jsonify(
-        #         {
-        #             "success": True,
-        #             "deleted": movie_id,
-        #         }
-        #     )
+     
         # except Exception as e:
         #     if isinstance(e, HTTPException):
         #         abort(e.code)
@@ -607,15 +615,15 @@ def create_app(test_config=None):
                 Movie.id == movie_id
                 ).one_or_none()
         
-        # if movie is None:
-        #     abort(404)
+        if movie is None:
+            abort(404, description="No movie with id "+ str(movie_id) +" exists")
 
         actor = Actor.query.filter(
                 Actor.id == actor_id
                 ).one_or_none()
         
         if actor is None:
-            abort(404)
+            abort(404, description="No actor with id "+ str(actor_id) +" exists")
             #TODO https://flask.palletsprojects.com/en/2.1.x/errorhandling/
             # Returning API Errors as JSON
             # abort(404, description="The actor with id " + actor_id + " does not exist.")
@@ -697,11 +705,19 @@ def create_app(test_config=None):
         return (
             jsonify({
                 "success": False,
-                "error": 404,
-                "message": "resource not found"
+                "error": str(error)
             }),
             404,
         )
+
+        # return (
+        #     jsonify({
+        #         "success": False,
+        #         "error": 404,
+        #         "message": "resource not found"
+        #     }),
+        #     404,
+        # )
 
     @app.errorhandler(405)
     def method_not_allowed(error):
