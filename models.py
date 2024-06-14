@@ -75,7 +75,6 @@ class Actor(db.Model):
     name = db.Column(db.String(), nullable=False)
     age = db.Column(db.Integer(), nullable=False)
     gender = db.Column(db.String(), nullable=False)
-    # gender = db.Column(db.Enum(GenderEnum), nullable=False)
     movies = db.relationship(
             'Movie',
             secondary="actors_movies",

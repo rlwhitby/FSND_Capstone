@@ -1,12 +1,15 @@
+import datetime
+from dateutil import parser
 import os
 from flask import Flask, jsonify, request, abort
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 #TODO: change model names
 # from models import setup_db, Plant
-from models import setup_db, Actor, Movie
+from models import setup_db, setup_migration, Actor, Movie
 import json
 from enums import GenreEnum
+from werkzeug.exceptions import HTTPException
 
 # https://flask.palletsprojects.com/en/2.3.x/tutorial/factory/
 def create_app(test_config=None):
@@ -15,7 +18,7 @@ def create_app(test_config=None):
     setup_db(app)
 
     #TODO
-    #setup_migration(app)
+    setup_migration(app)
     #TODO
     #CORS(app)
 
@@ -55,7 +58,7 @@ def create_app(test_config=None):
         """ The get_actors function uses the GET method to
         list all the avaliable actors in the agency.
 
-        The endpoint returns an list of actors if the user has the required 
+        The endpoint returns a list of actors if the user has the required 
         view permissions.
 
         Raises:
@@ -64,45 +67,24 @@ def create_app(test_config=None):
         HTTPException: 422, "unprocessable", if the request cannot be
         completed.
         """
-        allActors = Actor.query.all()
+        try:
+            allActors = Actor.query.all()
 
-        if len(allActors) == 0:
-            abort(404, description="There are no actors in the database")
+            if len(allActors) == 0:
+                abort(404, description="There are no actors in the database")
 
-        actors = list(map(lambda actor: actor.format(), allActors))
+            actors = list(map(lambda actor: actor.format(), allActors))
 
-        return jsonify(
-            {
-                "success": True,
-                "Actors":actors,
-            }
-            )
-    
+            return jsonify(
+                {
+                    "success": True,
+                    "Actors":actors,
+                }
+                )
         
-        # try:
+        except Exception as e:
+            customExceptionHandler(e)
 
-        #     # Ref: https://knowledge.udacity.com/questions/613259
-        #     categories = Category.query.all()
-
-        #     if len(categories) == 0:
-        #         abort(404)
-
-        #     return jsonify(
-        #         {
-        #             "success": True,
-        #             "categories": {
-        #                 category.id: category.type for category in categories
-        #             },
-        #         }
-        #     )
-        # # The below exception statement allows the abort(404) inside
-        # # the try block to work.
-        # # https://stackoverflow.com/questions/17746897/flask-abort-inside-try-block-behaviour
-        # except Exception as e:
-        #     if isinstance(e, HTTPException):
-        #         abort(e.code)
-        #     else:
-        #         abort(422)
 
     @app.route("/actor/<int:actor_id>/movies")
     #TODO: requires auth to view actors - pass in jwt
@@ -124,33 +106,28 @@ def create_app(test_config=None):
         HTTPException: 422, "unprocessable", if the request cannot be
         completed.
         """
-        #try:
-        actor = Actor.query.filter(
-            Actor.id == actor_id
-            ).one_or_none()
-        if actor is None:
-            abort(404, description="No actor with id "+ str(actor_id) +" exists")
-        
-        movies = [movie.format() for movie in actor.movies]
-        
-        if len(movies) == 0:
-            return jsonify({"message": "The actor "+ actor.name + " has not been cast in any movies yet"})
+        try:
+            actor = Actor.query.filter(
+                Actor.id == actor_id
+                ).one_or_none()
+            if actor is None:
+                abort(404, description="No actor with id "+ str(actor_id) +" exists")
+            
+            movies = [movie.format() for movie in actor.movies]
+            
+            if len(movies) == 0:
+                return jsonify({"message": "The actor "+ actor.name + " has not been cast in any movies yet"})
 
-        return jsonify(
-            {
-                "success": True,
-                "Actor":actor.format(),
-                "Movies cast in": movies
-            }
-            )
-    # # The below exception statement allows the abort(404) inside
-        # # the try block to work.
-        # # https://stackoverflow.com/questions/17746897/flask-abort-inside-try-block-behaviour
-        # except Exception as e:
-        #     if isinstance(e, HTTPException):
-        #         abort(e.code)
-        #     else:
-        #         abort(422)
+            return jsonify(
+                {
+                    "success": True,
+                    "Actor":actor.format(),
+                    "Movies cast in": movies
+                }
+                )
+
+        except Exception as e:
+            customExceptionHandler(e)
 
     @app.route("/actors/add", methods=["POST"])
     #TODO: requires auth to add actors - pass in jwt
@@ -166,44 +143,28 @@ def create_app(test_config=None):
         completed.
         """
         body = request.get_json()
-        new_name = body.get("name", None)
-        new_age = body.get("age", None)
-        new_gender = body.get("gender", None)
+        new_name = body.get("name")
+        new_age = body.get("age")
+        new_gender = body.get("gender")
 
-        actor = Actor(
-            name=new_name,
-            age=new_age,
-            gender=new_gender,
-        )
+        try: 
+            actor = Actor(
+                name=new_name,
+                age=new_age,
+                gender=new_gender,
+            )
 
-        actor.insert()
+            actor.insert()
 
-        return jsonify(
-            {
-                "success": True,
-                "created": actor.id,
-            }
-        )
+            return jsonify(
+                {
+                    "success": True,
+                    "created": actor.id,
+                }
+            )
 
-        # try:
-        #     movie = Movie(
-        #         title=new_title,
-        #         release_date=new_release_date,
-        #     )
-
-        #     movie.insert()
-
-        #     return jsonify(
-        #         {
-        #             "success": True,
-        #             "created": movie.id,
-        #         }
-        #     )
-        # except Exception as e:
-        #     if isinstance(e, HTTPException):
-        #         abort(e.code)
-        #     else:
-        #         abort(422)
+        except Exception as e:
+            customExceptionHandler(e)
 
     @app.route("/actors/<int:actor_id>/edit", methods=["PATCH"])
     #TODO: requires auth to edit actors - pass in jwt
@@ -221,55 +182,32 @@ def create_app(test_config=None):
         completed.
         """
         body = request.get_json()
-        #try:
-        actor = Actor.query.filter(
-            Actor.id == actor_id
-            ).one_or_none()
+        try:
+            actor = Actor.query.filter(
+                Actor.id == actor_id
+                ).one_or_none()
 
-        if actor is None:
-            abort(404, description="No actor with id "+ str(actor_id) +" exists")
-        
-        #TODO - what if one of the column names is missing?
-        if "name" in body:
-            actor.name = body.get("name", None)
-        if "age" in body:
-            actor.age = body.get("age", None)
-        if "gender" in body:
-            actor.gender = body.get("gender", None)
-        actor.update()
+            if actor is None:
+                abort(404, description="No actor with id "+ str(actor_id) +" exists")
+            
+            #TODO - what if one of the column names is missing?
+            if "name" in body:
+                actor.name = body.get("name")
+            if "age" in body:
+                actor.age = body.get("age")
+            if "gender" in body:
+                actor.gender = body.get("gender")
+            actor.update()
 
-        return jsonify(
-            {
-                "success": True,
-                "actor": actor.format(),
-            }
-        )
+            return jsonify(
+                {
+                    "success": True,
+                    "actor": actor.format(),
+                }
+            )
 
-        # try:
-            # actor = Actor.query.filter(
-            #     Actor.id == actor_id
-            #     ).one_or_none()
-            # if actor is None:
-            #     abort(404)
-            # if "name" in body:
-            #     actor.name = body.get("name")
-            # if "age" in body:
-            #     actor.age = body.get("age")
-            # if "gender" in body:
-            #     actor.gender = body.get("gender")
-            # actor.update()
-
-            # return jsonify(
-        #         {
-        #             "success": True,
-        #             "actor": actor.format(),
-        #         }
-        #     )
-        # except Exception as e:
-        #     if isinstance(e, HTTPException):
-        #         abort(e.code)
-        #     else:
-        #         abort(422)
+        except Exception as e:
+            customExceptionHandler(e)
 
     @app.route("/actors/<int:actor_id>/delete", methods=["DELETE"])
     #TODO: requires auth to delete actors - pass in jwt
@@ -286,40 +224,24 @@ def create_app(test_config=None):
         HTTPException: 422, "unprocessable", if the request cannot be
         completed.
         """
+        try: 
+            actor = Actor.query.filter(
+                    Actor.id == actor_id
+                    ).one_or_none()
+            if actor is None:
+                abort(404, description="No actor with id "+ str(actor_id) +" exists")
+            
+            actor.delete()
 
-        actor = Actor.query.filter(
-                Actor.id == actor_id
-                ).one_or_none()
-        if actor is None:
-            abort(404, description="No actor with id "+ str(actor_id) +" exists")
-        
-        actor.delete()
+            return jsonify(
+                {
+                    "success": True,
+                    "deleted": actor_id,
+                }
+            )
 
-        return jsonify(
-            {
-                "success": True,
-                "deleted": actor_id,
-            }
-        )
-        # try:
-        #     actor = Actor.query.filter(
-        #         Actor.id == actor_id
-        #         ).one_or_none()
-        #     if actor is None:
-        #         abort(404)
-        #     actor.delete()
-
-        #     return jsonify(
-        #         {
-        #             "success": True,
-        #             "deleted": actor_id,
-        #         }
-        #     )
-        # except Exception as e:
-        #     if isinstance(e, HTTPException):
-        #         abort(e.code)
-        #     else:
-        #         abort(422)
+        except Exception as e:
+            customExceptionHandler(e)
 
     # ----------------------------------------------------------------------------#
     # Movie Endpoints
@@ -340,45 +262,24 @@ def create_app(test_config=None):
         HTTPException: 422, "unprocessable", if the request cannot be
         completed.
         """
-        allMovies = Movie.query.all()
+        try:
+            allMovies = Movie.query.all()
 
-        if len(allMovies) == 0:
-            abort(404, description="There are no movies in the database")
+            if len(allMovies) == 0:
+               abort(404, description ="There are no movies in the database")
 
-        movies = list(map(lambda movie: movie.format(), allMovies))
 
-        return jsonify(
-            {
-                "success": True,
-                "Movies":movies,
-            }
-            )
-    
-        
-        # try:
+            movies = list(map(lambda movie: movie.format(), allMovies))
 
-        #     # Ref: https://knowledge.udacity.com/questions/613259
-        #     categories = Category.query.all()
-
-        #     if len(categories) == 0:
-        #         abort(404)
-
-        #     return jsonify(
-        #         {
-        #             "success": True,
-        #             "categories": {
-        #                 category.id: category.type for category in categories
-        #             },
-        #         }
-        #     )
-        # # The below exception statement allows the abort(404) inside
-        # # the try block to work.
-        # # https://stackoverflow.com/questions/17746897/flask-abort-inside-try-block-behaviour
-        # except Exception as e:
-        #     if isinstance(e, HTTPException):
-        #         abort(e.code)
-        #     else:
-        #         abort(422)
+            return jsonify(
+                {
+                    "success": True,
+                    "Movies":movies,
+                }
+                )
+        #TODO fix this
+        except Exception as e:
+            customExceptionHandler(e)
 
     @app.route("/movie/<int:movie_id>/actors")
     #TODO: requires auth to view actors - pass in jwt
@@ -400,34 +301,29 @@ def create_app(test_config=None):
         HTTPException: 422, "unprocessable", if the request cannot be
         completed.
         """
-        #try:
-        movie = Movie.query.filter(
-            Movie.id == movie_id
-            ).one_or_none()
-        
-        if movie is None:
-            abort(404, description="No movie with id "+ str(movie_id) +" exists")
-        
-        actors = [actor.format() for actor in movie.actors]
-        
-        if len(actors) == 0:
-            return jsonify({"message": "The movie "+ movie.title + " does not have any cast members yet"})
+        try:
+            movie = Movie.query.filter(
+                Movie.id == movie_id
+                ).one_or_none()
+            
+            if movie is None:
+                abort(404, description="No movie with id "+ str(movie_id) +" exists")
+            
+            actors = [actor.format() for actor in movie.actors]
+            
+            if len(actors) == 0:
+                return jsonify({"message": "The movie "+ movie.title + " does not have any cast members yet"})
 
-        return jsonify(
-            {
-                "success": True,
-                "Movie":movie.format(),
-                "Actors cast": actors
-            }
-            )
-    # # The below exception statement allows the abort(404) inside
-        # # the try block to work.
-        # # https://stackoverflow.com/questions/17746897/flask-abort-inside-try-block-behaviour
-        # except Exception as e:
-        #     if isinstance(e, HTTPException):
-        #         abort(e.code)
-        #     else:
-        #         abort(422)
+            return jsonify(
+                {
+                    "success": True,
+                    "Movie":movie.format(),
+                    "Actors cast": actors
+                }
+                )
+        
+        except Exception as e:
+            customExceptionHandler(e)
 
 
     @app.route("/movies/add", methods=["POST"])
@@ -445,57 +341,55 @@ def create_app(test_config=None):
         completed.
         """
         body = request.get_json()
-        new_title = body.get("title", None)
-        new_release_date = body.get("release_date", None)
-        new_genre = body.get("genre")
+        #TODO: where to start try statement?
+
+        if "title" in body:
+            new_title = body.get("title")
+        else:
+            abort(422, description="A movie title must be provided")
+        # Provide a more descriptive error message if the release_date value is not included or isn't a date
+        # dateutil.parser is used to covert the string date into a datetime object for the purposes of 
+        # checking
+        # Ref: https://stackoverflow.com/questions/16870663/how-do-i-validate-a-date-string-format-in-python
+        # Ref: https://dateutil.readthedocs.io/en/stable/index.html
+        if "release_date" in body and isinstance(parser.parse(body.get("release_date")), datetime.datetime) :
+            new_release_date = body.get("release_date")
+        else:
+            abort(422, description="A release date must be provided")
 
         genre_list = [genre.value for genre in GenreEnum]
-
-        if new_genre in genre_list:
-            new_genre = body.get("genre")
-        else: 
-            return jsonify(
-                {
+        if "genre" in body:
+            if body.get("genre") in genre_list:
+                new_genre = body.get("genre")
+            else:
+                return jsonify(
+                    {
                         "entered_genre": body.get("genre"),
                         "error": "A genre from the following list must be entered:",
                         "genre list": genre_list
+                    }
+                )
+        else:
+            abort(422, description="A genre must be provided")
+        
+        try: 
+            movie = Movie(
+                title=new_title,
+                release_date=new_release_date,
+                genre=new_genre
+            )
+
+            movie.insert()
+
+            return jsonify(
+                {
+                    "success": True,
+                    "created": movie.id,
                 }
             )
-            
-        movie = Movie(
-            title=new_title,
-            release_date=new_release_date,
-            genre=new_genre
-        )
 
-        movie.insert()
-
-        return jsonify(
-            {
-                "success": True,
-                "created": movie.id,
-            }
-        )
-
-        # try:
-        #     movie = Movie(
-        #         title=new_title,
-        #         release_date=new_release_date,
-        #     )
-
-        #     movie.insert()
-
-        #     return jsonify(
-        #         {
-        #             "success": True,
-        #             "created": movie.id,
-        #         }
-        #     )
-        # except Exception as e:
-        #     if isinstance(e, HTTPException):
-        #         abort(e.code)
-        #     else:
-        #         abort(422)
+        except Exception as e:
+            customExceptionHandler(e)
 
     @app.route("/movies/<int:movie_id>/edit", methods=["PATCH"])
     #TODO: requires auth to edit movies - pass in jwt
@@ -513,49 +407,44 @@ def create_app(test_config=None):
         completed.
         """
         body = request.get_json()
-        #try:
-        movie = Movie.query.filter(
-            Movie.id == movie_id
-            ).one_or_none()
+        try:
+            movie = Movie.query.filter(
+                Movie.id == movie_id
+                ).one_or_none()
 
-        if movie is None:
-            abort(404, description="No movie with id "+ str(movie_id) +" exists")
+            if movie is None:
+                abort(404, description="No movie with id "+ str(movie_id) +" exists")
 
-        #TODO what if column names aren't listed in the body? doesn't seem to be an issue
-        if "title" in body:
-            movie.title = body.get("title")
-        if "release_date" in body:
-            movie.release_date = body.get("release_date")
+            #TODO what if column names aren't listed in the body? doesn't seem to be an issue
+            if "title" in body:
+                movie.title = body.get("title")
+            if "release_date" in body:
+                movie.release_date = body.get("release_date")
 
-        genre_list = [genre.value for genre in GenreEnum]
-        if "genre" in body:
-            if body.get("genre") in genre_list:
-                movie.genre = body.get("genre")
-            else:
-                return jsonify(
-                    {
-                            "entered_genre": body.get("genre"),
-                            "error": "A genre from the following list must be entered:",
-                            "genre list": genre_list
-                    }
-                )
-            
-        movie.update()
+            genre_list = [genre.value for genre in GenreEnum]
+            if "genre" in body:
+                if body.get("genre") in genre_list:
+                    movie.genre = body.get("genre")
+                else:
+                    return jsonify(
+                        {
+                                "entered_genre": body.get("genre"),
+                                "error": "A genre from the following list must be entered:",
+                                "genre list": genre_list
+                        }
+                    )
+                
+            movie.update()
 
-        return jsonify(
-            {
-                "success": True,
-                "movie": movie.format(),
-            }
-        )
-
-        # try:
+            return jsonify(
+                {
+                    "success": True,
+                    "movie": movie.format(),
+                }
+            )
        
-        # except Exception as e:
-        #     if isinstance(e, HTTPException):
-        #         abort(e.code)
-        #     else:
-        #         abort(422)
+        except Exception as e:
+            customExceptionHandler(e)
 
     @app.route("/movies/<int:movie_id>/delete", methods=["DELETE"])
     #TODO: requires auth to delete movies - pass in jwt
@@ -572,29 +461,25 @@ def create_app(test_config=None):
         HTTPException: 422, "unprocessable", if the request cannot be
         completed.
         """
+        try:
+            movie = Movie.query.filter(
+                    Movie.id == movie_id
+                    ).one_or_none()
+            
+            if movie is None:
+                abort(404, description="No movie with id "+ str(movie_id) +" exists")
+            
+            movie.delete()
 
-        movie = Movie.query.filter(
-                Movie.id == movie_id
-                ).one_or_none()
-        
-        if movie is None:
-            abort(404, description="No movie with id "+ str(movie_id) +" exists")
-        
-        movie.delete()
+            return jsonify(
+                {
+                    "success": True,
+                    "deleted": movie_id,
+                }
+            )
 
-        return jsonify(
-            {
-                "success": True,
-                "deleted": movie_id,
-            }
-        )
-        # try:
-     
-        # except Exception as e:
-        #     if isinstance(e, HTTPException):
-        #         abort(e.code)
-        #     else:
-        #         abort(422)
+        except Exception as e:
+            customExceptionHandler(e)
 
     @app.route("/movie/<int:movie_id>/actor/<int:actor_id>", methods=["POST"])
     #TODO: requires auth to add movies - pass in jwt
@@ -610,87 +495,74 @@ def create_app(test_config=None):
         HTTPException: 422, "unprocessable", if the request cannot be
         completed.
         """
-        #TODO what about get_or_404? will this remove lines of code?
-        movie = Movie.query.filter(
-                Movie.id == movie_id
-                ).one_or_none()
-        
-        if movie is None:
-            abort(404, description="No movie with id "+ str(movie_id) +" exists")
+        try:
+            #TODO what about get_or_404? will this remove lines of code?
+            movie = Movie.query.filter(
+                    Movie.id == movie_id
+                    ).one_or_none()
+            
+            if movie is None:
+                abort(404, description="No movie with id "+ str(movie_id) +" exists")
 
-        actor = Actor.query.filter(
-                Actor.id == actor_id
-                ).one_or_none()
-        
-        if actor is None:
-            abort(404, description="No actor with id "+ str(actor_id) +" exists")
-            #TODO https://flask.palletsprojects.com/en/2.1.x/errorhandling/
-            # Returning API Errors as JSON
-            # abort(404, description="The actor with id " + actor_id + " does not exist.")
+            actor = Actor.query.filter(
+                    Actor.id == actor_id
+                    ).one_or_none()
+            
+            if actor is None:
+                abort(404, description="No actor with id "+ str(actor_id) +" exists")
+                #TODO https://flask.palletsprojects.com/en/2.1.x/errorhandling/
+                # Returning API Errors as JSON
+                # abort(404, description="The actor with id " + actor_id + " does not exist.")
 
-        movie.actors.append(actor)
-        movie.insert()
+            movie.actors.append(actor)
+            movie.insert()
 
-        #TODO - are both needed?
-        # actor.movies.append(movie)
-        # actor.insert()
-
-
-        return jsonify(
-            {
-                "success": True,
-                #TODO return names instead of IDs?
-                "Movie linked": movie.id,
-                "Actor linked": actor.id
-            }
-        )
-
-        # try:
-        #     movie = Movie(
-        #         title=new_title,
-        #         release_date=new_release_date,
-        #     )
-
-        #     movie.insert()
-
-        #     return jsonify(
-        #         {
-        #             "success": True,
-        #             "created": movie.id,
-        #         }
-        #     )
-
+            return jsonify(
+                {
+                    "success": True,
+                    #TODO return names instead of IDs?
+                    "Movie linked": movie.id,
+                    "Actor linked": actor.id
+                }
+            )
         #TODO: https://flask.palletsprojects.com/en/2.1.x/errorhandling/
         # Generic Exception Handlers section
 
-        # except Exception as e:
-        #     if isinstance(e, HTTPException):
-        #         abort(e.code)
-        #     else:
-        #         abort(422)
+        except Exception as e:
+            customExceptionHandler(e)
 
     # ----------------------------------------------------------------------------#
     # Error Handling.
     # ----------------------------------------------------------------------------#
 
+    # The below exception handler function allows any abort() inside
+    # the try blocks to work wihle also minimising duplicate code.
+    # https://stackoverflow.com/questions/17746897/flask-abort-inside-try-block-behaviour
+    def customExceptionHandler(e):
+        if isinstance(e, HTTPException):
+            # If the error has a unique message passed as a description parameter,
+            # it will be passed through to the error handler
+            # If no description parameter is defined, if will pass the default
+            # error message
+            abort(e.code, e.description)
+        else:
+            abort(422)
+
     #TODO: add error handling for at least four status codes
-    """
-    @TODO:
-    Create error handlers for all expected errors
-    including 404 and 422, 400 and 500.
-    """
 
     @app.errorhandler(400)
     def bad_request(error):
-        """The bad_request error handler returns a json
-        message, "bad request", when a method is aborted with a 400
+        """The bad_request error handler returns the error code and 
+        a json message, when a method is aborted with a 400
         error.
         """
+
         return (
             jsonify({
                 "success": False,
                 "error": 400,
-                "message": "bad request"
+                # "message": "bad request"
+                "message": error.description
             }),
             400,
         )
@@ -698,14 +570,16 @@ def create_app(test_config=None):
     #TODO: update to allow message to be passed in abort(404) code
     @app.errorhandler(404)
     def not_found(error):
-        """The not_found error handler returns a json
-        message, "resource not found", when a method is aborted with a
+        """The not_found error handler returns the error code and 
+        a json message, when a method is aborted with a
         404 error.
         """
+
         return (
             jsonify({
                 "success": False,
-                "error": str(error)
+                "error": 404,
+                "message": error.description
             }),
             404,
         )
@@ -729,7 +603,8 @@ def create_app(test_config=None):
             jsonify({
                 "success": False,
                 "error": 405,
-                "message": "method not allowed"
+                # "message": "method not allowed"
+                "message": error.description
             }),
             405,
         )
@@ -744,7 +619,8 @@ def create_app(test_config=None):
             jsonify({
                 "success": False,
                 "error": 422,
-                "message": "unprocessable"
+                # "message": "unprocessable"
+                "message": error.description
             }),
             422,
         )
@@ -759,7 +635,8 @@ def create_app(test_config=None):
             jsonify({
                 "success": False,
                 "error": 500,
-                "message": "internal server error"
+                # "message": "internal server error"
+                "message": error.description
             }),
             500,
         )

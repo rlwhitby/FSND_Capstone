@@ -397,14 +397,16 @@ curl -X POST http://127.0.0.1:5000/movie/1/actor/1
 
 :white_check_mark: ~~@app.errorhandler for at least four status codes~~
 
-:black_square_button: update endpoints with try: except: blocks
+:white_check_mark: ~~update endpoints with try: except: blocks~~
 
 :white_check_mark: ~~try this to write more dynamic 404 messages:~~
 https://flask.palletsprojects.com/en/2.1.x/errorhandling/ Returning API Errors as JSON
 
-:black_square_button: test error handling
+:white_check_mark: ~~test error handling~~
 
 :black_square_button: implement Migrations and reset database
+
+:black_square_button: separate error handling into its own file?
 
 ### Authorisation and 
 :black_square_button: setup Auth0 with three roles - 
