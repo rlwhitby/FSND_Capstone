@@ -532,3 +532,8 @@ To be on the safe side I recommend providing a username and password for each ro
 :black_square_button: update setup.sh file with tokens
 
 :black_square_button: test all endpoints, roles and tests
+
+
+# consider
+:black_square_button: setup migrations and instructions flask db upgrade to setup a blank database
+:black_square_button: psql instructions for schema only, or scema + data?
