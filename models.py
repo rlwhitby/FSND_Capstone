@@ -1,7 +1,7 @@
 import os
 # from sqlalchemy import Column, String, Integer
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
+# from flask_migrate import Migrate
 from datetime import datetime
 import json
 from enums import GenreEnum
@@ -28,10 +28,9 @@ def setup_db(app, database_path=database_path):
     db.init_app(app)
     db.create_all()
 
-#TODO - use migrate = Migrate(app,db)
-
-def setup_migration(app):
-    migrate = Migrate(app,db)
+#TODO - remove this
+# def setup_migration(app):
+#     migrate = Migrate(app,db)
 
 #     with app.app_context():
 #         db.create_all()
@@ -39,7 +38,7 @@ def setup_migration(app):
 '''
 db_drop_and_create_all()
     drops the database tables and starts fresh
-    can be used to initialize a clean database
+    can be used to initialize a clean database - used in the test_capstone.py file
     !!NOTE you can change the database_filename variable to have multiple verisons of a database
 '''
 # Ref: coffee_shop project

@@ -4,8 +4,6 @@ import os
 from flask import Flask, jsonify, request, abort
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-#TODO: change model names
-# from models import setup_db, Plant
 from models import setup_db, setup_migration, Actor, Movie
 import json
 from enums import GenreEnum
@@ -17,8 +15,8 @@ def create_app(test_config=None):
     app = Flask(__name__)
     setup_db(app)
 
-    #TODO
-    setup_migration(app)
+    #TODO - not using migrations - so remove
+    #setup_migration(app)
     #TODO
     #CORS(app)
 
@@ -27,9 +25,6 @@ def create_app(test_config=None):
 
     # # # https://knowledge.udacity.com/questions/720875
     # # db.init_app(app)
-
-    # # # TODO: connect to a local postgresql database
-    # # migrate = Migrate(app, db)
 
     """
     @TODO: Set up CORS. Allow '*' for origins. Delete the sample route
@@ -657,3 +652,9 @@ def create_app(test_config=None):
     # app.logger.info('errors')
 
     return app
+
+#TODO use this instead of return app for render deployment?
+# app = create_app()
+
+# if __name__ == '__main__':
+#     app.run()

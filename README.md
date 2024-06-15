@@ -39,6 +39,14 @@ For endpoints that require authentication, see the `setup.sh` file for relevant 
 pip install -r requirements.txt
 ```
 
+# Key dependancies
+#TODO - rmove?
+https://realpython.com/flask-by-example-part-2-postgres-sqlalchemy-and-alembic/
+PostgreSQL
+Flask
+SQLAlchemy
+Flask-CORS
+
 3. configure database
 change DATABASE_URI variable in setup.sh file if needed to match you local Postgresql database username and password
 
@@ -98,43 +106,66 @@ Start Postgres and
 # \q
 
 sudo -u postgres -i
-createdb capstone
+dropdb capstone && createdb capstone
 
 psql capstone
 \q
 
 exit
 ```
-
-3. **Add tables to database from migrations directory:**
+#TODO: don't do this - loading the intial data from capstone.psql fails
+#TODO: can use this if command sudo -u postgres psql -d capstone < capstone-data.psql
+#is used (psql file created from pg_dump --data-only capstone > capstone-data.psql)
+#Using flask db upgrade and .psql is a problem if the schema and the database contents diverge,
+#so the idea was discarded.
+~~3. **Add tables to database from migrations directory:**~~
 ```bash
-flask db upgrade
+#flask db upgrade
+# sudo -u postgres -i
+# psql capstone
+# #check that the three tables have been created
+# \dt
+# #check columns and relationships of tables
+# \d actors
+# \d movies
+# \d actors_movies
+# \q
+# exit
 
-sudo -u postgres psql -d capstone < capstone.psql
 ```
 
 2. **Load the initial data into the database:**
-```
+```bash
+sudo -u postgres psql -d capstone < capstone.psql
 
-psql -U postgres -d fyyur
 
-# Add data into tables by copying contents of data.txt file.
-# This loads data into the tables so that the id's match the mock data.
+sudo -u postgres -i
 
-# Check the data - there should be 3 records in both venues (id 1-3) and artists (id 4-6) and 5 records in shows (id 1-5).
+psql capstone
+#check that the three tables have been created
+\dt
 
-SELECT * FROM venues;
-SELECT * FROM artists;
-SELECT * FROM shows;
+#check columns and relationships of tables
+\d actors
+\d movies
+\d actors_movies
+
+#check that initial data has loaded
+SELECT * FROM actors;
+SELECT * FROM movies;
+SELECT * FROM actors_movies;
+
 \q
+
+exit
 
 ```
 
 **Running Tests**
 ```bash
 sudo -u postgres -i
-dropdb capstone_test
-createdb capstone_test
+dropdb capstone_test && createdb capstone_test
+exit
 sudo -u postgres psql -d capstone_test < capstone.psql
 python test_app.py
 ```
@@ -491,9 +522,12 @@ https://knowledge.udacity.com/questions/199305
 
 :black_square_button: run app and use curl commands to add actors, movies and link some of them together
 
-:black_square_button: pg_dump and save output to .psql file
+:black_square_button: pg_dump and save output to .psql file (pg_dump capstone > capstone3.psql)
 
 :black_square_button: ensure Auth0 is running and jwt tokens will be valid before submission
+
+# https://knowledge.udacity.com/questions/703470
+To be on the safe side I recommend providing a username and password for each role and the login URL.
 
 :black_square_button: update setup.sh file with tokens
 
