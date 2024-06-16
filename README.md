@@ -22,6 +22,30 @@ The deployed application can be accessed via this link:
 For endpoints that require authentication, see the `setup.sh` file for relevant Auth0 information.
 ###
 
+## AUTH0 login URL:
+
+https://dev-dudattxg70vfdgkq.au.auth0.com/authorize?
+  audience=castingAgencyAPI&
+  response_type=token&
+  client_id=t4oSkhZhgtTiA9Tcy1eR6eEYiF88QtXg&
+  redirect_uri=http://127.0.0.1:8080/login-results
+
+login as users to get new tokens
+after loging in, copy the text between **login-result#** and **&expires_in** in the resulting url:
+
+127.0.0.1:8080/login-results#==access_token=eyJhbGciO....pGPtjyO6EQ==&expires_in=7200&token_type=Bearer
+
+Casting Assistant
+
+casting_assistant@gmail.com
+passwordAssistant3456#
+
+
+
+
+
+
+
 ## 2. Running the App Locally
 
 ### 2.1 Installing Dependencies
