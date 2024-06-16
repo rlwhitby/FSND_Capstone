@@ -31,9 +31,9 @@ https://dev-dudattxg70vfdgkq.au.auth0.com/authorize?
   redirect_uri=http://127.0.0.1:8080/login-results
 
 login as users to get new tokens
-after loging in, copy the text between **login-result#** and **&expires_in** in the resulting url:
+after loging in, copy the text between **login-result#access_token=** and **&expires_in=** in the resulting url:
 
-127.0.0.1:8080/login-results#==access_token=eyJhbGciO....pGPtjyO6EQ==&expires_in=7200&token_type=Bearer
+127.0.0.1:8080/login-results#access_token= ==eyJhbGciO....pGPtjyO6EQ== &expires_in=7200&token_type=Bearer
 
 Casting Assistant
 
