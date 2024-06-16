@@ -56,36 +56,36 @@ https://flask.palletsprojects.com/en/2.1.x/errorhandling/ Returning API Errors a
 :black_square_button: separate error handling into its own file?
 
 ### Authorisation and 
-:black_square_button: setup Auth0 with three roles - 
+:white_check_mark: setup Auth0 with three roles - 
 
-:black_square_button: get Auth header, decode and verfiy JWT, takes argumnet to describe action
+:white_check_mark: get Auth header, decode and verfiy JWT, takes argument to describe action
 
-:black_square_button: add @requires decorator to endpoints
+:white_check_mark: add @requires decorator to endpoints
 
-:black_square_button: raise error if; token expried, claims invalid, token invalid, improper action
+:white_check_mark: raise error if; token expried, claims invalid, token invalid, improper action
 
-:black_square_button: update setup.sh file
+:white_check_mark: update setup.sh file
 
-:black_square_button: test authorisation
+:black_square_button: test authorisation - almost finished
 
 :black_square_button: update docstrings with auth details
 
 :black_square_button: update readme with auth and role details
 
 ### Testing
-:black_square_button: add test folder/files
+:white_check_mark: add test folder/files
 
-:black_square_button: add tests for one success and one failure for each endpoint
-- GET actors
-- GET movies
-- GET actor movies
-- GET movie actors
-- POST actor
-- POST movie
+:white_check_mark: add tests for one success and one failure for each endpoint
+- ~~GET actors~~
+- ~~GET movies~~
+- ~~GET actor movies~~
+- ~~GET movie actors~~
+- ~~POST actor~~
+- ~~POST movie~~
 - POST actor to movie
-- PATCH actor
-- PATCH movie
-- DELETE actor
+- ~~PATCH actor~~
+- ~~PATCH movie~~
+- ~~DELETE actor~~
 - DELETE movie
 
 :black_square_button: add tests demonstrating role-based access (two for each role)
@@ -95,7 +95,7 @@ https://knowledge.udacity.com/questions/199305
 
 :black_square_button: update setup.sh file with tokens
 
-:black_square_button: update README with testing database setup and how to run tests
+:white_check_mark: update README with testing database setup and how to run tests
 
 ### Deployment
 :black_square_button: host API on Render or AWS
@@ -109,7 +109,7 @@ https://knowledge.udacity.com/questions/199305
 
 :black_square_button: check all comments and docstrings
 
-:black_square_button: all secrets stored as environment variables
+:black_square_button: all secrets~and tokens stored as environment variables
 
 :black_square_button: README includes
 
@@ -143,6 +143,9 @@ https://knowledge.udacity.com/questions/199305
 :black_square_button: ensure Auth0 is running and jwt tokens will be valid before submission
 
 # https://knowledge.udacity.com/questions/703470
+:black_square_button: Add to readme - run login url and logrin as each user to get new tokens - save to setup.sh file
+run source setup.sh
+
 To be on the safe side I recommend providing a username and password for each role and the login URL.
 
 :black_square_button: update setup.sh file with tokens
@@ -153,3 +156,7 @@ To be on the safe side I recommend providing a username and password for each ro
 # consider
 :black_square_button: setup migrations and instructions flask db upgrade to setup a blank database
 :black_square_button: psql instructions for schema only, or scema + data?
+
+
+#NOTE
+downgraded itsdangerous to version 1.1.0 to remove the depretiation warning from unittest

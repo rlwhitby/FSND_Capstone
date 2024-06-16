@@ -4,10 +4,11 @@ import os
 from flask import Flask, jsonify, request, abort
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from models import setup_db, setup_migration, Actor, Movie
+from models import setup_db, Actor, Movie
 import json
 from enums import GenreEnum
 from werkzeug.exceptions import HTTPException
+from .auth.auth import AuthError, requires_auth
 
 # https://flask.palletsprojects.com/en/2.3.x/tutorial/factory/
 def create_app(test_config=None):
@@ -18,7 +19,7 @@ def create_app(test_config=None):
     #TODO - not using migrations - so remove
     #setup_migration(app)
     #TODO
-    #CORS(app)
+    CORS(app)
 
     # #TODO: swap to using config file and Migrate? Fyyur - or use settings like in Trivia App?
     # # moment = Moment(app)
@@ -31,13 +32,16 @@ def create_app(test_config=None):
     after completing the TODOs
     """
     #TODO
-    # CORS(app, resources={r"/api/*": {"origins": "*"}})
-
-    """
-    @TODO: Use the after_request decorator to set Access-Control-Allow
-    """
-    #TODO
-
+    # The after_request function has been added in to manage a CORS 'Access-Control-Allow-Origin' error that would prevent the frontend from working correctly depite the fact the CORS has been configured in Auth0.
+    @app.after_request
+    def after_request(response):
+        response.headers.add(
+            "Access-Control-Allow-Headers", "Content-type,Authorization,true"
+        )
+        response.headers.add(
+            "Access-Control-Allow-Methods", "GET, PATCH, POST, POST, DELETE, OPTIONS"
+        )
+        return response
         
     @app.route("/")
     def index():
@@ -48,8 +52,9 @@ def create_app(test_config=None):
     # ----------------------------------------------------------------------------#
 
     @app.route("/actors")
+    @requires_auth("view:actors")
     #TODO: requires auth to view actors - pass in jwt
-    def get_actors():
+    def get_actors(payload):
         """ The get_actors function uses the GET method to
         list all the avaliable actors in the agency.
 
@@ -73,17 +78,16 @@ def create_app(test_config=None):
             return jsonify(
                 {
                     "success": True,
-                    "Actors":actors,
+                    "actors":actors,
                 }
                 )
         
         except Exception as e:
             customExceptionHandler(e)
 
-
     @app.route("/actor/<int:actor_id>/movies")
-    #TODO: requires auth to view actors - pass in jwt
-    def get_actor_movies(actor_id):
+    @requires_auth("view:actors")
+    def get_actor_movies(payload, actor_id):
         """ The get_actor_movies function uses the GET method to
         list the movies an actor is cast in based on the actor_id.
 
@@ -111,13 +115,17 @@ def create_app(test_config=None):
             movies = [movie.format() for movie in actor.movies]
             
             if len(movies) == 0:
-                return jsonify({"message": "The actor "+ actor.name + " has not been cast in any movies yet"})
+                return jsonify({
+                    "success": True,
+                    "actor":actor.name,
+                    "movies cast in": "The actor "+ actor.name + " has not been cast in any movies yet"
+                    })
 
             return jsonify(
                 {
                     "success": True,
-                    "Actor":actor.format(),
-                    "Movies cast in": movies
+                    "actor":actor.name,
+                    "movies cast in": movies
                 }
                 )
 
@@ -125,8 +133,8 @@ def create_app(test_config=None):
             customExceptionHandler(e)
 
     @app.route("/actors/add", methods=["POST"])
-    #TODO: requires auth to add actors - pass in jwt
-    def add_actor():
+    @requires_auth("post:actors")
+    def add_actor(payload):
         """ The add_actor endpoint uses the POST method to
         add a new actor to the database.
 
@@ -154,7 +162,7 @@ def create_app(test_config=None):
             return jsonify(
                 {
                     "success": True,
-                    "created": actor.id,
+                    "created": actor.format(),
                 }
             )
 
@@ -162,8 +170,8 @@ def create_app(test_config=None):
             customExceptionHandler(e)
 
     @app.route("/actors/<int:actor_id>/edit", methods=["PATCH"])
-    #TODO: requires auth to edit actors - pass in jwt
-    def edit_actor(actor_id):
+    @requires_auth("update:actors")
+    def edit_actor(payload, actor_id):
         """ The edit_actor function uses the PATCH method to
         edit a chosen actor from the database.
 
@@ -205,8 +213,8 @@ def create_app(test_config=None):
             customExceptionHandler(e)
 
     @app.route("/actors/<int:actor_id>/delete", methods=["DELETE"])
-    #TODO: requires auth to delete actors - pass in jwt
-    def delete_actor(actor_id):
+    @requires_auth("delete:actors")
+    def delete_actor(payload, actor_id):
         """ The delete_actor function uses the DELETE method to
         delete a chosen actor from the database.
 
@@ -243,8 +251,8 @@ def create_app(test_config=None):
     # ----------------------------------------------------------------------------#
 
     @app.route("/movies")
-    #TODO: requires auth to view movies - pass in jwt
-    def get_movies():
+    @requires_auth("view:movies")
+    def get_movies(payload):
         """ The get_movies function uses the GET method to
         list all the avaliable movies in the agency.
 
@@ -269,7 +277,7 @@ def create_app(test_config=None):
             return jsonify(
                 {
                     "success": True,
-                    "Movies":movies,
+                    "movies":movies,
                 }
                 )
         #TODO fix this
@@ -277,8 +285,8 @@ def create_app(test_config=None):
             customExceptionHandler(e)
 
     @app.route("/movie/<int:movie_id>/actors")
-    #TODO: requires auth to view actors - pass in jwt
-    def get_movie_actors(movie_id):
+    @requires_auth("view:movies")
+    def get_movie_actors(payload, movie_id):
         """ The get_movie_actors function uses the GET method to
         list the actors cast in a movie based on the movie_id.
 
@@ -300,30 +308,33 @@ def create_app(test_config=None):
             movie = Movie.query.filter(
                 Movie.id == movie_id
                 ).one_or_none()
-            
             if movie is None:
                 abort(404, description="No movie with id "+ str(movie_id) +" exists")
             
             actors = [actor.format() for actor in movie.actors]
             
             if len(actors) == 0:
-                return jsonify({"message": "The movie "+ movie.title + " does not have any cast members yet"})
+                return jsonify({
+                    "success": True,
+                    "movie":movie.title,
+                    "actors cast": "The movie "+ movie.title + " does not have any cast members yet"
+                    })
 
             return jsonify(
                 {
                     "success": True,
-                    "Movie":movie.format(),
-                    "Actors cast": actors
+                    "movie":movie.title,
+                    "actors cast": actors
                 }
                 )
-        
+
         except Exception as e:
             customExceptionHandler(e)
 
 
     @app.route("/movies/add", methods=["POST"])
-    #TODO: requires auth to add movies - pass in jwt
-    def add_movie():
+    @requires_auth("post:movies")
+    def add_movie(payload):
         """ The add_movie endpoint uses the POST method to
         add a new movie to the database.
 
@@ -338,19 +349,22 @@ def create_app(test_config=None):
         body = request.get_json()
         #TODO: where to start try statement?
 
-        if "title" in body:
-            new_title = body.get("title")
-        else:
-            abort(422, description="A movie title must be provided")
-        # Provide a more descriptive error message if the release_date value is not included or isn't a date
-        # dateutil.parser is used to covert the string date into a datetime object for the purposes of 
-        # checking
-        # Ref: https://stackoverflow.com/questions/16870663/how-do-i-validate-a-date-string-format-in-python
-        # Ref: https://dateutil.readthedocs.io/en/stable/index.html
-        if "release_date" in body and isinstance(parser.parse(body.get("release_date")), datetime.datetime) :
-            new_release_date = body.get("release_date")
-        else:
-            abort(422, description="A release date must be provided")
+        new_title = body.get("title")
+        new_release_date = body.get("release_date")
+
+        # if "title" in body:
+        #     new_title = body.get("title")
+        # else:
+        #     abort(422, description="A movie title must be provided")
+        # # Provide a more descriptive error message if the release_date value is not included or isn't a date
+        # # dateutil.parser is used to covert the string date into a datetime object for the purposes of 
+        # # checking
+        # # Ref: https://stackoverflow.com/questions/16870663/how-do-i-validate-a-date-string-format-in-python
+        # # Ref: https://dateutil.readthedocs.io/en/stable/index.html
+        # if "release_date" in body and isinstance(parser.parse(body.get("release_date")), datetime.datetime) :
+        #     new_release_date = body.get("release_date")
+        # else:
+        #     abort(422, description="A release date must be provided")
 
         genre_list = [genre.value for genre in GenreEnum]
         if "genre" in body:
@@ -379,7 +393,7 @@ def create_app(test_config=None):
             return jsonify(
                 {
                     "success": True,
-                    "created": movie.id,
+                    "created": movie.format(),
                 }
             )
 
@@ -387,8 +401,8 @@ def create_app(test_config=None):
             customExceptionHandler(e)
 
     @app.route("/movies/<int:movie_id>/edit", methods=["PATCH"])
-    #TODO: requires auth to edit movies - pass in jwt
-    def edit_movie(movie_id):
+    @requires_auth("update:movies")
+    def edit_movie(payload, movie_id):
         """ The edit_movie function uses the PATCH method to
         edit a chosen movie from the database.
 
@@ -442,8 +456,8 @@ def create_app(test_config=None):
             customExceptionHandler(e)
 
     @app.route("/movies/<int:movie_id>/delete", methods=["DELETE"])
-    #TODO: requires auth to delete movies - pass in jwt
-    def delete_movie(movie_id):
+    @requires_auth("delete:movies")
+    def delete_movie(payload, movie_id):
         """ The delete_actor function uses the DELETE method to
         delete a chosen actor from the database.
 
@@ -477,8 +491,8 @@ def create_app(test_config=None):
             customExceptionHandler(e)
 
     @app.route("/movie/<int:movie_id>/actor/<int:actor_id>", methods=["POST"])
-    #TODO: requires auth to add movies - pass in jwt
-    def link_movie_to_actor(movie_id, actor_id):
+    @requires_auth("post:cast_actors")
+    def link_movie_to_actor(payload, movie_id, actor_id):
         """ The add_movie endpoint uses the POST method to
         add a new movie to the database.
 
@@ -515,9 +529,8 @@ def create_app(test_config=None):
             return jsonify(
                 {
                     "success": True,
-                    #TODO return names instead of IDs?
-                    "Movie linked": movie.id,
-                    "Actor linked": actor.id
+                    "movie": movie.title,
+                    "actor cast": actor.name
                 }
             )
         #TODO: https://flask.palletsprojects.com/en/2.1.x/errorhandling/
@@ -543,8 +556,6 @@ def create_app(test_config=None):
         else:
             abort(422)
 
-    #TODO: add error handling for at least four status codes
-
     @app.errorhandler(400)
     def bad_request(error):
         """The bad_request error handler returns the error code and 
@@ -555,8 +566,7 @@ def create_app(test_config=None):
         return (
             jsonify({
                 "success": False,
-                "error": 400,
-                # "message": "bad request"
+                "error": f"{error.code}: {error.name}",
                 "message": error.description
             }),
             400,
@@ -573,20 +583,11 @@ def create_app(test_config=None):
         return (
             jsonify({
                 "success": False,
-                "error": 404,
+                "error": f"{error.code}: {error.name}",
                 "message": error.description
             }),
             404,
         )
-
-        # return (
-        #     jsonify({
-        #         "success": False,
-        #         "error": 404,
-        #         "message": "resource not found"
-        #     }),
-        #     404,
-        # )
 
     @app.errorhandler(405)
     def method_not_allowed(error):
@@ -597,8 +598,7 @@ def create_app(test_config=None):
         return (
             jsonify({
                 "success": False,
-                "error": 405,
-                # "message": "method not allowed"
+                "error": f"{error.code}: {error.name}",
                 "message": error.description
             }),
             405,
@@ -613,8 +613,7 @@ def create_app(test_config=None):
         return (
             jsonify({
                 "success": False,
-                "error": 422,
-                # "message": "unprocessable"
+                "error": f"{error.code}: {error.name}",
                 "message": error.description
             }),
             422,
@@ -629,13 +628,25 @@ def create_app(test_config=None):
         return (
             jsonify({
                 "success": False,
-                "error": 500,
-                # "message": "internal server error"
+                "error": f"{error.code}: {error.name}",
                 "message": error.description
             }),
             500,
         )
 
+    @app.errorhandler(AuthError)
+    def auth_error(error):
+        """The auth_error error handler returns an appropriate json message when an authorization error is raised.
+
+        Args:
+        error (Any): The error code passed by the raised AuthError.
+
+        Returns:
+        response: The status code and JSON string defined by the raised AuthError..
+        """
+        response = jsonify(error.error)
+        response.status_code = error.status_code
+        return response
 
     #TODO - from Fyyur - what does this do? is it useful?
     # if not app.debug:

@@ -169,10 +169,11 @@ exit
 **Running Tests**
 ```bash
 sudo -u postgres -i
-dropdb capstone_test && createdb capstone_test
+dropdb capstone_test
+createdb capstone_test
 exit
 sudo -u postgres psql -d capstone_test < capstone.psql
-python test_app.py
+python test_flaskr.py
 ```
 ## Actor Endpoints
 
