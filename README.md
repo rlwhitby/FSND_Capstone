@@ -1,12 +1,11 @@
 # FSND_capstone
 
-
-## Introduction and Motivation
-
 <details>
 <summary>
 
-## Introduction and Motivation</summary>
+## Introduction and Motivation
+</summary>
+
 Full Stack Nanodegree Capstone Project
 </details>
 
