@@ -56,46 +56,48 @@ https://flask.palletsprojects.com/en/2.1.x/errorhandling/ Returning API Errors a
 :black_square_button: separate error handling into its own file?
 
 ### Authorisation and 
-:white_check_mark: setup Auth0 with three roles - 
+:white_check_mark: ~~setup Auth0 with three roles~~
 
-:white_check_mark: get Auth header, decode and verfiy JWT, takes argument to describe action
+:white_check_mark: ~~get Auth header, decode and verfiy JWT, takes argument to describe action~~
 
-:white_check_mark: add @requires decorator to endpoints
+:white_check_mark: ~~add @requires decorator to endpoints~~
 
-:white_check_mark: raise error if; token expried, claims invalid, token invalid, improper action
+:white_check_mark: ~~raise error if; token expried, claims invalid, token invalid, improper action~~
 
-:white_check_mark: update setup.sh file
+:white_check_mark: ~~update setup.sh file~~
 
-:black_square_button: test authorisation - almost finished
+:white_check_mark: ~~test authorisation~~
 
 :black_square_button: update docstrings with auth details
 
 :black_square_button: update readme with auth and role details
 
 ### Testing
-:white_check_mark: add test folder/files
+:white_check_mark: ~~add test folder/files~~
 
-:white_check_mark: add tests for one success and one failure for each endpoint
+:white_check_mark: ~~add tests for one success and one failure for each endpoint~~
 - ~~GET actors~~
 - ~~GET movies~~
 - ~~GET actor movies~~
 - ~~GET movie actors~~
 - ~~POST actor~~
 - ~~POST movie~~
-- POST actor to movie
+- ~~POST actor to movie~~
 - ~~PATCH actor~~
 - ~~PATCH movie~~
 - ~~DELETE actor~~
-- DELETE movie
+- ~~DELETE movie~~
 
-:black_square_button: add tests demonstrating role-based access (two for each role)
+:white_check_mark: ~~add tests demonstrating role-based access (two for each role)~~
 https://knowledge.udacity.com/questions/321996
 https://knowledge.udacity.com/questions/724461 - include tokens in setup.sh
 https://knowledge.udacity.com/questions/199305
 
-:black_square_button: update setup.sh file with tokens
+:white_check_mark: ~~update setup.sh file with tokens~~
 
 :white_check_mark: update README with testing database setup and how to run tests
+
+:black_square_button: create and test postman file
 
 ### Deployment
 :black_square_button: host API on Render or AWS
@@ -105,7 +107,7 @@ https://knowledge.udacity.com/questions/199305
 :black_square_button: update README with instructions to setup authentication so endpoints can be tested
 
 ### Code Quality and Documentation
-:black_square_button: run pycodestyle against all .py files
+:black_square_button: run pycodestyle against all .py files and black formatter
 
 :black_square_button: check all comments and docstrings
 
@@ -140,7 +142,7 @@ https://knowledge.udacity.com/questions/199305
 
 :black_square_button: pg_dump and save output to .psql file (pg_dump capstone > capstone3.psql)
 
-:black_square_button: ensure Auth0 is running and jwt tokens will be valid before submission
+:black_square_button: ensure Auth0 is running and jwt tokens will be valid before submission - update role expiry
 
 # https://knowledge.udacity.com/questions/703470
 :black_square_button: Add to readme - run login url and logrin as each user to get new tokens - save to setup.sh file
@@ -160,3 +162,55 @@ To be on the safe side I recommend providing a username and password for each ro
 
 #NOTE
 downgraded itsdangerous to version 1.1.0 to remove the depretiation warning from unittest
+
+
+# ----------------------------------------------------------------------------#
+    # RBAC Tests
+    # ----------------------------------------------------------------------------#
+    # two tests for three roles
+    # Ref: https://knowledge.udacity.com/questions/109567
+
+    # def test_get_movies_casting_assistant(self):
+    #     """This should work
+    #     """
+    #     pass
+
+    # def test_get_actor_movies_casting_assistant(self):
+    #     """This should work
+    #     """
+    #     pass
+
+    # def test_add_new_actor_casting_assistant_401(self):
+    #     """This should not work - does not have permission
+    #     """
+    #     pass
+
+    # def test_add_new_actor_casting_director(self):
+    #     """This should work
+    #     """
+    #     pass
+
+    # def test_cast_actor_in_movie_casting_director(self):
+    #     """This should work
+    #     """
+    #     pass
+
+    # def test_add_new_movie_casting_director_401(self):
+    #     """This should not work - does not have permission
+    #     """
+    #     pass
+
+    # def test_add_new_movie_executive_producer(self):
+    #     """This should work
+    #     """
+    #     pass
+
+    # def test_delete_movie_executive_producer(self):
+    #     """This should work
+    #     """
+    #     pass
+
+    # def test_delete_movie_executive_producer_404(self):
+    #     """This should not work if the movie doesn't exist
+    #     """
+    #     pass

@@ -24,8 +24,8 @@ id number to the unit test cases that expect them
 """
 VALID_MOVIE_ID = 1
 VALID_ACTOR_ID = 1
-INVALID_MOVIE_ID = 50
-INVALID_ACTOR_ID = 50
+INVALID_MOVIE_ID = 1000
+INVALID_ACTOR_ID = 1000
 
 VALID_ACTOR = {"name": "Harrison Ford", "age": 81, "gender": "Male"}
 INVALID_ACTOR = {"name": "Harrison Ford", "age": 81}

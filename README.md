@@ -24,23 +24,38 @@ For endpoints that require authentication, see the `setup.sh` file for relevant 
 
 ## AUTH0 login URL:
 
-https://dev-dudattxg70vfdgkq.au.auth0.com/authorize?
-  audience=castingAgencyAPI&
-  response_type=token&
-  client_id=t4oSkhZhgtTiA9Tcy1eR6eEYiF88QtXg&
-  redirect_uri=http://127.0.0.1:8080/login-results
+#TODO use :5000 url? if yes, update Auth0
 
-login as users to get new tokens
+https://dev-dudattxg70vfdgkq.au.auth0.com/authorize?audience=castingAgencyAPI&response_type=token&client_id=t4oSkhZhgtTiA9Tcy1eR6eEYiF88QtXg&redirect_uri=http://127.0.0.1:8080/login-results
+
+https://dev-dudattxg70vfdgkq.au.auth0.com/authorize?audience=castingAgencyAPI&response_type=token&client_id=t4oSkhZhgtTiA9Tcy1eR6eEYiF88QtXg&redirect_uri=http://127.0.0.1:5000/login-results
+
+If the tokens supplied have expired, login as as the the users to get new tokens
 after loging in, copy the text between **login-result#access_token=** and **&expires_in=** in the resulting url:
 
-127.0.0.1:8080/login-results#access_token= ==eyJhbGciO....pGPtjyO6EQ== &expires_in=7200&token_type=Bearer
+> 127.0.0.1:8080/login-results#access_token=***eyJhbGciO....pGPtjyO6EQ***&expires_in=7200&token_type=Bearer
 
-Casting Assistant
+and replace the tokens in the setup.sh file.
+
+run the setup script to apply the new tokens:
+```bash
+source ./setup.sh
+```
+
+# Casting Assistant
 
 casting_assistant@gmail.com
 passwordAssistant3456#
 
+# Casting Director
 
+casting_director@gmail.com
+passwordDirector8756@
+
+# Executive Producer
+
+executive_producer@gmail.com
+passwordProducer4704$
 
 
 
@@ -198,6 +213,11 @@ createdb capstone_test
 exit
 sudo -u postgres psql -d capstone_test < capstone.psql
 python test_flaskr.py
+
+# to run individual tests
+python test_flaskr.py CapstoneTestCase.test_name
+# example
+python test_flaskr.py CapstoneTestCase.test_delete_movie_403
 ```
 ## Actor Endpoints
 

@@ -30,7 +30,7 @@ class CapstoneTestCase(unittest.TestCase):
         self.app = create_app()
         self.client = self.app.test_client
         setup_db(self.app, TEST_DATABASE_URI)
-        self.casting_assistent = ASSISTANT_TOKEN
+        self.casting_assistant = ASSISTANT_TOKEN
         self.casting_director = DIRECTOR_TOKEN
         self.executive_producer = PRODUCER_TOKEN
 
@@ -71,7 +71,7 @@ class CapstoneTestCase(unittest.TestCase):
             - that "actors" contains values.
         """
 
-        auth_header = self.get_headers(self.casting_assistent)
+        auth_header = self.get_headers(self.casting_assistant)
         res = self.client().get("/actors", headers=auth_header)
         data = json.loads(res.data)
 
@@ -114,7 +114,7 @@ class CapstoneTestCase(unittest.TestCase):
             - a "message" of "The method is not allowed for the requested URL.".
         """
 
-        auth_header = self.get_headers(self.casting_assistent)
+        auth_header = self.get_headers(self.casting_assistant)
         res = self.client().post("/actors", headers=auth_header)
         data = json.loads(res.data)
 
@@ -138,7 +138,7 @@ class CapstoneTestCase(unittest.TestCase):
             - that "movies cast in" contains values, either a list of movies
                 or a message stating that the actor has not been cast yet
         """
-        auth_header = self.get_headers(self.casting_assistent)
+        auth_header = self.get_headers(self.casting_assistant)
         res = self.client().get("/actor/" + str(VALID_ACTOR_ID)+ "/movies", headers=auth_header)
 
         #TODO - make this it's own method?
@@ -166,7 +166,7 @@ class CapstoneTestCase(unittest.TestCase):
             - a "message" of "No actor with id "+ str(INVALID_ACTOR_ID) +" exists"
         """
 
-        auth_header = self.get_headers(self.casting_assistent)
+        auth_header = self.get_headers(self.casting_assistant)
         res = self.client().get("/actor/" + str(INVALID_ACTOR_ID)+ "/movies", headers=auth_header)
 
         data = json.loads(res.data)
@@ -257,7 +257,7 @@ class CapstoneTestCase(unittest.TestCase):
             - a "code" value of "unauthorized".
         """
 
-        auth_header = self.get_headers(self.casting_assistent)
+        auth_header = self.get_headers(self.casting_assistant)
         res = self.client().post(
             "/actors/add",
             json=VALID_ACTOR,
@@ -354,7 +354,7 @@ class CapstoneTestCase(unittest.TestCase):
             - a "code" value of "unauthorized".
         """
 
-        auth_header = self.get_headers(self.casting_assistent)
+        auth_header = self.get_headers(self.casting_assistant)
         res = self.client().patch(
             "/actors/" + str(VALID_ACTOR_ID)+ "/edit",
             json=VALID_ACTOR_PATCH,
@@ -478,7 +478,7 @@ class CapstoneTestCase(unittest.TestCase):
         actor_id = actor_data["created"]["id"]
 
         # Try to delete the actor
-        auth_header = self.get_headers(self.casting_assistent)
+        auth_header = self.get_headers(self.casting_assistant)
         res = self.client().delete("/actors/" + str(actor_id)+ "/delete",
             headers=auth_header)
         data = json.loads(res.data)
@@ -503,7 +503,7 @@ class CapstoneTestCase(unittest.TestCase):
             - that "movies" contains values.
         """
 
-        auth_header = self.get_headers(self.casting_assistent)
+        auth_header = self.get_headers(self.casting_assistant)
         res = self.client().get("/movies", headers=auth_header)
 
         data = json.loads(res.data)
@@ -546,7 +546,7 @@ class CapstoneTestCase(unittest.TestCase):
             - a "success" value of False, and
             - a "message" of "The method is not allowed for the requested URL.".
         """
-        auth_header = self.get_headers(self.casting_assistent)
+        auth_header = self.get_headers(self.casting_assistant)
         res = self.client().post("/movies", headers=auth_header)
         data = json.loads(res.data)
 
@@ -570,7 +570,7 @@ class CapstoneTestCase(unittest.TestCase):
             - that "actors" contains values, either a list of movies
                 or a message stating that the actor has not been cast yet
         """
-        auth_header = self.get_headers(self.casting_assistent)
+        auth_header = self.get_headers(self.casting_assistant)
         res = self.client().get("/movie/" + str(VALID_MOVIE_ID)+ "/actors", headers=auth_header)
 
         #TODO - make this it's own method?
@@ -598,7 +598,7 @@ class CapstoneTestCase(unittest.TestCase):
             - a "message" of "No movie with id "+ str(INVALID_MOVIE_ID) +" exists".
         """
 
-        auth_header = self.get_headers(self.casting_assistent)
+        auth_header = self.get_headers(self.casting_assistant)
         res = self.client().get("/movie/" + str(INVALID_MOVIE_ID)+ "/actors", headers=auth_header)
 
         data = json.loads(res.data)
@@ -705,7 +705,7 @@ class CapstoneTestCase(unittest.TestCase):
         """ Test successful behaviour for PATCH /movies/movie_id/edit endpoint
         
         The test_edit_movie test uses the PATCH method to
-        edit an movie in the test database.
+        edit a movie in the test database.
 
         The assert statements check that the endpoint returns:
         - a status code of 200
@@ -787,7 +787,7 @@ class CapstoneTestCase(unittest.TestCase):
             - a "code" value of "unauthorized".
         """
 
-        auth_header = self.get_headers(self.casting_assistent)
+        auth_header = self.get_headers(self.casting_assistant)
         res = self.client().patch(
             "/movies/" + str(VALID_MOVIE_ID)+ "/edit",
             json=VALID_MOVIE_PATCH,
@@ -798,9 +798,10 @@ class CapstoneTestCase(unittest.TestCase):
         self.assertEqual(data["success"], False)
         self.assertEqual(data["code"], "unauthorized")
 
-    #TODO ADD AUTHORISATION TESTS FOR EVERYTHING BELOW HERE
     def test_delete_movie(self):
-        """ The test_delete_movie test uses the DELETE method to
+        """ Test successful behaviour for DELETE /movies/movie_id/delete
+        
+        The test_delete_movie test uses the DELETE method to
         delete an movie from the test database.
 
         The assert statements check that the endpoint returns:
@@ -810,23 +811,21 @@ class CapstoneTestCase(unittest.TestCase):
             - a "deleted" value matching the id in the endpoint.
         """
         # Add a movie to the database
+        auth_header = self.get_headers(self.executive_producer)
         add_movie = self.client().post(
             "/movies/add",
-            json=VALID_MOVIE
+            json=VALID_MOVIE,
+            headers=auth_header
             )
-        #TODO
-        # auth_header = get_headers(self.casting_assistent)
-        # add_movie = self.client().post("/movies/add",json=VALID_MOVIE,
-        #                         headers=auth_header)
 
+        # get the new movies id
         movie_data = json.loads(add_movie.data)
         movie_id = movie_data["created"]["id"]
         
-        res = self.client().delete("/movies/" + str(movie_id) + "/delete")
-         #TODO
-        # auth_header = get_headers(self.casting_assistent)
-        # res = self.client().delete("/movies/" + 2 + "/delete",
-        #                         headers=auth_header)
+        # Attempt to delete movie
+        auth_header = self.get_headers(self.executive_producer)
+        res = self.client().delete("/movies/" + str(movie_id) + "/delete", headers=auth_header)
+
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
@@ -834,9 +833,9 @@ class CapstoneTestCase(unittest.TestCase):
         self.assertEqual(data["deleted"], movie_id)
 
     def test_delete_movie_404(self):
-        """ Test of successful behaviour of GET /movie/movie_id/actors endpoint
+        """ Test 404 error behaviour for DELETE /movies/movie_id/delete
         
-        The test_delete_movie_404_not_found test validates
+        The test_delete_movie_404 test validates
         that the expected HTTP exception is raised if the deletion of
         a movie that does not exist in the database is attempted.
 
@@ -846,11 +845,9 @@ class CapstoneTestCase(unittest.TestCase):
             - a "success" value of False, and
             - a "message" of "No movie with id "+ str(INVALID_MOVIE_ID) +" exists".
         """
-        res = self.client().delete("/movies/" + str(INVALID_MOVIE_ID) + "/delete")
-         #TODO
-        # auth_header = get_headers(self.casting_assistent)
-        # res = self.client().delete("/movies/" + str(INVALID_MOVIE_ID)+ "/delete",
-        #                         headers=auth_header)
+        
+        auth_header = self.get_headers(self.executive_producer)
+        res = self.client().delete("/movies/" + str(INVALID_MOVIE_ID) + "/delete", headers=auth_header)
 
         data = json.loads(res.data)
 
@@ -859,9 +856,9 @@ class CapstoneTestCase(unittest.TestCase):
         self.assertEqual(data["message"], "No movie with id "+ str(INVALID_MOVIE_ID) +" exists")
 
     def test_delete_movie_401(self):
-        """ Test 401 error behaviour for DELETE /actors/actor_id/delete endpoint
+        """ Test 401 error behaviour for DELETE /actors/actor_id/delete
 
-        The test_delete_actor_401 test tries to delete an actor without the
+        The test_delete_movie_401 test tries to delete an movie without the
         required authorization header to validate that the expected HTTP exception is
         raised.
 
@@ -871,19 +868,20 @@ class CapstoneTestCase(unittest.TestCase):
             - a "success" value of False, and
             - a "code" value of "authorization_header_missing".
         """
-        # Add an actor to the database
-        auth_header = self.get_headers(self.casting_director)
-        add_actor = self.client().post(
-            "/actors/add",
-            json=VALID_ACTOR,
-            headers=auth_header)
-        
-        # get the new actors id
-        actor_data = json.loads(add_actor.data)
-        actor_id = actor_data["created"]["id"]
+        # Add a movie to the database
+        auth_header = self.get_headers(self.executive_producer)
+        add_movie = self.client().post(
+            "/movies/add",
+            json=VALID_MOVIE,
+            headers=auth_header
+            )
 
-        # Try to delete the actor
-        res = self.client().delete("/actors/" + str(actor_id)+ "/delete")
+        # get the new movies id
+        movie_data = json.loads(add_movie.data)
+        movie_id = movie_data["created"]["id"]
+        
+        # Attempt to delete movie
+        res = self.client().delete("/movies/" + str(movie_id) + "/delete")
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 401)
@@ -891,7 +889,7 @@ class CapstoneTestCase(unittest.TestCase):
         self.assertEqual(data["code"], "authorization_header_missing")
 
     def test_delete_movie_403(self):
-        """ Test 403 error behaviour for DELETE /actors/actor_id/delete endpoint
+        """ Test 403 error behaviour for DELETE /movies/movie_id/delete
 
         The test_delete_movie_403 test tries to delete an movie without the
         required permission to validate that the expected HTTP exception is
@@ -903,21 +901,21 @@ class CapstoneTestCase(unittest.TestCase):
             - a "success" value of False, and
             - a "code" value of "unauthorized".
         """
-        # Add an actor to the database
-        auth_header = self.get_headers(self.casting_director)
-        add_actor = self.client().post(
-            "/actors/add",
-            json=VALID_ACTOR,
-            headers=auth_header)
-        
-        # get the new actors id
-        actor_data = json.loads(add_actor.data)
-        actor_id = actor_data["created"]["id"]
+       # Add a movie to the database
+        auth_header = self.get_headers(self.executive_producer)
+        add_movie = self.client().post(
+            "/movies/add",
+            json=VALID_MOVIE,
+            headers=auth_header
+            )
 
-        # Try to delete the actor
-        auth_header = self.get_headers(self.casting_assistent)
-        res = self.client().delete("/actors/" + str(actor_id)+ "/delete",
-            headers=auth_header)
+        # get the new movies id
+        movie_data = json.loads(add_movie.data)
+        movie_id = movie_data["created"]["id"]
+        
+        # Attempt to delete movie
+        auth_header = self.get_headers(self.casting_director)
+        res = self.client().delete("/movies/" + str(movie_id) + "/delete",headers=auth_header)
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 403)
@@ -925,17 +923,16 @@ class CapstoneTestCase(unittest.TestCase):
         self.assertEqual(data["code"], "unauthorized")
 
     def test_cast_actors_in_movies(self):
-        """ Test of successful behaviour of the POST /movie/movie_id/actor/actor_id endpoint
+        """ Test of successful behaviour of the POST /movie/movie_id/actor/actor_id
 
         The assert statements check that the endpoint returns:
         - 
         """
-        res = self.client().post("/movie/" + str(VALID_MOVIE_ID) + "/actor/" + str(VALID_ACTOR_ID))
 
-        #TODO
-        # auth_header = get_headers(self.casting_assistent)
-        # res = self.client().post("/movie/" + str(VALID_MOVIE_ID) + "/actor/" + str(VALID_ACTOR_ID),
-        #                         headers=auth_header)
+        auth_header = self.get_headers(self.casting_director)
+        res = self.client().post(
+            "/movie/" + str(VALID_MOVIE_ID) + "/actor/" + str(VALID_ACTOR_ID),
+            headers=auth_header)
 
         data = json.loads(res.data)
 
@@ -961,12 +958,10 @@ class CapstoneTestCase(unittest.TestCase):
         The assert statements check that the endpoint returns:
         - 
         """
-        res = self.client().post("/movie/" + str(INVALID_MOVIE_ID) + "/actor/" + str(VALID_ACTOR_ID))
-
-        #TODO
-        # auth_header = get_headers(self.casting_assistent)
-        # res = self.client().post("/movie/" + str(INVALID_MOVIE_ID) + "/actor/" + str(VALID_ACTOR_ID),
-        #                         headers=auth_header)
+        auth_header = self.get_headers(self.casting_director)
+        res = self.client().post(
+            "/movie/" + str(INVALID_MOVIE_ID) + "/actor/" + str(VALID_ACTOR_ID),
+            headers=auth_header)
 
         data = json.loads(res.data)
 
@@ -982,12 +977,10 @@ class CapstoneTestCase(unittest.TestCase):
         The assert statements check that the endpoint returns:
         - 
         """
-        res = self.client().post("/movie/" + str(VALID_MOVIE_ID) + "/actor/" + str(INVALID_ACTOR_ID))
-
-        #TODO
-        # auth_header = get_headers(self.casting_assistent)
-        # res = self.client().post("/movie/" + str(VALID_MOVIE_ID) + "/actor/" + str(INVALID_ACTOR_ID),
-        #                         headers=auth_header)
+        auth_header = self.get_headers(self.casting_director)
+        res = self.client().post(
+            "/movie/" + str(VALID_MOVIE_ID) + "/actor/" + str(INVALID_ACTOR_ID),
+            headers=auth_header)
 
         data = json.loads(res.data)
 
@@ -996,61 +989,49 @@ class CapstoneTestCase(unittest.TestCase):
         self.assertEqual(data["message"], "No actor with id "+ str(INVALID_ACTOR_ID) +" exists")
     
     def test_cast_actors_in_movies_401(self):
-        pass
+        """ Test 401 error behaviour for POST /movie/movie_id/actor/actor_id
+
+        The test_cast_actors_in_movies_401 test tries to cast an actor in a 
+        movie without the required authorization header to validate that the
+        expected HTTP exception is raised.
+
+        The assert statements check that the endpoint returns:
+        - a status code of 401
+        - a json object with: 
+            - a "success" value of False, and
+            - a "code" value of "authorization_header_missing".
+        """
+
+        res = self.client().post(
+            "/movie/" + str(VALID_MOVIE_ID) + "/actor/" + str(VALID_ACTOR_ID))
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 401)
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["code"], "authorization_header_missing")
 
     def test_cast_actors_in_movies_403(self):
-        pass
-    # ----------------------------------------------------------------------------#
-    # RBAC Tests
-    # ----------------------------------------------------------------------------#
-    # two tests for three roles
-    # Ref: https://knowledge.udacity.com/questions/109567
+        """ Test 403 error behaviour for POST /movie/movie_id/actor/actor_id
 
-    # def test_get_movies_casting_assistant(self):
-    #     """This should work
-    #     """
-    #     pass
+        The test_cast_actors_in_movies_403 test tries to cast an actor in a 
+        movie without the required permission to validate that the expected 
+        HTTP exception is raised.
 
-    # def test_get_actor_movies_casting_assistant(self):
-    #     """This should work
-    #     """
-    #     pass
+        The assert statements check that the endpoint returns:
+        - a status code of 403
+        - a json object with: 
+            - a "success" value of False, and
+            - a "code" value of "unauthorized".
+        """
+        auth_header = self.get_headers(self.casting_assistant)
+        res = self.client().post(
+            "/movie/" + str(VALID_MOVIE_ID) + "/actor/" + str(VALID_ACTOR_ID),
+            headers=auth_header)
+        data = json.loads(res.data)
 
-    # def test_add_new_actor_casting_assistant_401(self):
-    #     """This should not work - does not have permission
-    #     """
-    #     pass
-
-    # def test_add_new_actor_casting_director(self):
-    #     """This should work
-    #     """
-    #     pass
-
-    # def test_cast_actor_in_movie_casting_director(self):
-    #     """This should work
-    #     """
-    #     pass
-
-    # def test_add_new_movie_casting_director_401(self):
-    #     """This should not work - does not have permission
-    #     """
-    #     pass
-
-    # def test_add_new_movie_executive_producer(self):
-    #     """This should work
-    #     """
-    #     pass
-
-    # def test_delete_movie_executive_producer(self):
-    #     """This should work
-    #     """
-    #     pass
-
-    # def test_delete_movie_executive_producer_404(self):
-    #     """This should not work if the movie doesn't exist
-    #     """
-    #     pass
-
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["code"], "unauthorized")
 
 # Make the tests conveniently executable
 if __name__ == "__main__":

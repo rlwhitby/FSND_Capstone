@@ -43,7 +43,7 @@ def create_app(test_config=None):
         )
         return response
         
-    @app.route("/")
+    @app.route("/login-results")
     def index():
         return jsonify({'message': "Welcome to the Casting Agency App!"})
         
