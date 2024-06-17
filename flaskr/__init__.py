@@ -27,10 +27,6 @@ def create_app(test_config=None):
     # # # https://knowledge.udacity.com/questions/720875
     # # db.init_app(app)
 
-    """
-    @TODO: Set up CORS. Allow '*' for origins. Delete the sample route
-    after completing the TODOs
-    """
     #TODO
     # The after_request function has been added in to manage a CORS 'Access-Control-Allow-Origin' error that would prevent the frontend from working correctly depite the fact the CORS has been configured in Auth0.
     @app.after_request
@@ -43,6 +39,7 @@ def create_app(test_config=None):
         )
         return response
         
+    #TODO: leave tihs as is or /?
     @app.route("/login-results")
     def index():
         return jsonify({'message': "Welcome to the Casting Agency App!"})
@@ -53,7 +50,6 @@ def create_app(test_config=None):
 
     @app.route("/actors")
     @requires_auth("view:actors")
-    #TODO: requires auth to view actors - pass in jwt
     def get_actors(payload):
         """ The get_actors function uses the GET method to
         list all the avaliable actors in the agency.
@@ -330,7 +326,6 @@ def create_app(test_config=None):
 
         except Exception as e:
             customExceptionHandler(e)
-
 
     @app.route("/movies/add", methods=["POST"])
     @requires_auth("post:movies")
@@ -647,20 +642,6 @@ def create_app(test_config=None):
         response = jsonify(error.error)
         response.status_code = error.status_code
         return response
-
-    #TODO - from Fyyur - what does this do? is it useful?
-    # if not app.debug:
-    # file_handler = FileHandler('error.log')
-    # file_handler.setFormatter(
-    #     Formatter(
-    #         '%(asctime)s %(levelname)s: %(message)s \
-    #         [in %(pathname)s:%(lineno)d]'
-    #              )
-    # )
-    # app.logger.setLevel(logging.INFO)
-    # file_handler.setLevel(logging.INFO)
-    # app.logger.addHandler(file_handler)
-    # app.logger.info('errors')
 
     return app
 

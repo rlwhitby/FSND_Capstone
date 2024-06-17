@@ -11,7 +11,6 @@ API_AUDIENCE = os.environ["API_AUDIENCE"]
 
 ## AuthError Exception
 
-
 class AuthError(Exception):
     """AuthError Exception
     A standardized way to communicate auth failure modes
@@ -49,10 +48,9 @@ def get_token_auth_header():
     # check if Authorization is in request.headers
     if "Authorization" not in request.headers:
         raise AuthError(
-            {
-                "code": "authorization_header_missing",
-                "description": "no authorization header is present in the request.",
-                "success": False,
+            {"code": "authorization_header_missing",
+             "description": "no authorization header is present in the request.",
+             "success": False,
             },
             401,
         )
