@@ -5,7 +5,7 @@ import json
 # Third party imports
 from flask_sqlalchemy import SQLAlchemy
 # Local application imports
-from flaskr import create_app
+from flaskr.app import create_app
 from models import setup_db, Movie, Actor
 from test_constants import *
 
