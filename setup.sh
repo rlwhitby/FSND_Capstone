@@ -11,7 +11,7 @@ export AUTH0_DOMAIN="dev-dudattxg70vfdgkq.au.auth0.com"
 export ALGORITHMS=["RS256"]
 export API_AUDIENCE="castingAgencyAPI"
 
-export DATABASE_URI="postgresql://postgres:postgres@localhost:5432/capstone"
+export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/capstone"
 export FLASK_APP=flaskr
 export FLASK_DEBUG=True
 export FLASK_ENVIRONMENT=debug

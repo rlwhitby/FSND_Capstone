@@ -13,7 +13,13 @@ from enums import GenreEnum
 # Reference: https://knowledge.udacity.com/questions/217605#217639
 # Reference: https://www.geeksforgeeks.org/python-os-environ-object/
 
-database_path = os.environ['DATABASE_URI']
+
+database_path = os.environ['DATABASE_URL']
+
+
+if database_path.startswith('postgres://'):
+    database_path = database_path.replace('postgres://', 'postgresql://', 1)
+# Now you can use the modified DATABASE_URL with SQLAlchemy.
 
 db = SQLAlchemy()
 
@@ -39,6 +45,7 @@ def setup_db(app, database_path=database_path):
 db_drop_and_create_all()
     drops the database tables and starts fresh
     can be used to initialize a clean database - used in the test_capstone.py file
+    #TODO - I don't think this is needed?
     !!NOTE you can change the database_filename variable to have multiple verisons of a database
 '''
 # Ref: coffee_shop project
