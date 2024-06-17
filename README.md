@@ -103,7 +103,7 @@ DATABASE_URL="postgresql://{username}:{password}@localhost:5432/capstone"
 source ./setup.sh
 
 # Optional - Run these commands to check that env variables have been set
-echo $DATABASE_URI
+echo $DATABASE_URL
 echo $FLASK_APP
 echo $FLASK_DEBUG
 echo $FLASK_ENVIRONMENT
@@ -113,7 +113,7 @@ echo $FLASK_ENVIRONMENT
 ```bash
 #TODO remove once set up
 cd FSND_capstone
-conda activate capstone_env
+source .venv/bin/activate
 
 # activate virtual_env
 

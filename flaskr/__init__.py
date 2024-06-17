@@ -14,7 +14,9 @@ from .auth.auth import AuthError, requires_auth
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
-    setup_db(app)
+
+    with app.app_context():
+        setup_db(app)
 
     #TODO - not using migrations - so remove
     #setup_migration(app)
@@ -39,8 +41,8 @@ def create_app(test_config=None):
         )
         return response
         
-    #TODO: leave tihs as is or /?
-    @app.route("/login-results")
+    #TODO: leave this as / or /login-results?
+    @app.route("/")
     def index():
         return jsonify({'message': "Welcome to the Casting Agency App!"})
         
