@@ -16,7 +16,7 @@ from enums import GenreEnum
 
 database_path = os.environ['DATABASE_URL']
 
-
+# Ref: https://knowledge.udacity.com/questions/1010850
 if database_path.startswith('postgres://'):
     database_path = database_path.replace('postgres://', 'postgresql://', 1)
 # Now you can use the modified DATABASE_URL with SQLAlchemy.
