@@ -14,10 +14,10 @@ from test_constants import *
 # tokens exist in setup.sh
 # https://knowledge.udacity.com/questions/533049
 
-TEST_DATABASE_URI = os.environ['TEST_DATABASE_URI']
-ASSISTANT_TOKEN = os.environ['ASSISTANT_TOKEN']
-DIRECTOR_TOKEN = os.environ['DIRECTOR_TOKEN']
-PRODUCER_TOKEN = os.environ['PRODUCER_TOKEN']
+TEST_DATABASE_URI = os.environ.get('TEST_DATABASE_URI')
+ASSISTANT_TOKEN = os.environ.get('ASSISTANT_TOKEN')
+DIRECTOR_TOKEN = os.environ.get('DIRECTOR_TOKEN')
+PRODUCER_TOKEN = os.environ.get('PRODUCER_TOKEN')
 
 class CapstoneTestCase(unittest.TestCase):
     """This class represents the capstone project test case"""

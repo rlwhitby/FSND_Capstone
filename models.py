@@ -14,7 +14,7 @@ from enums import GenreEnum
 # Reference: https://www.geeksforgeeks.org/python-os-environ-object/
 
 
-database_path = os.environ['DATABASE_URL']
+database_path = os.environ.get('DATABASE_URL')
 
 # Ref: https://knowledge.udacity.com/questions/1010850
 if database_path.startswith('postgres://'):
