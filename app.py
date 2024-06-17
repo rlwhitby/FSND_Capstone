@@ -8,7 +8,7 @@ from models import setup_db, Actor, Movie
 import json
 from enums import GenreEnum
 from werkzeug.exceptions import HTTPException
-from .auth.auth import AuthError, requires_auth
+from auth.auth import AuthError, requires_auth
 
 # https://flask.palletsprojects.com/en/2.3.x/tutorial/factory/
 def create_app(test_config=None):
